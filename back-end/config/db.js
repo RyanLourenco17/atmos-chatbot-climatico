@@ -3,9 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
+const { getWeather } = require('./WeatherService');
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: 'https://atmos-chatbot-climatico.vercel.app/'
+}
+));
 app.use(express.json());
 app.use(express.static('public'));
 dotenv.config();
@@ -40,3 +45,8 @@ mongoose
 app.listen(port, () => {
   console.log(`O backend está rodando na porta ${port}`);
 });
+
+// Testando rota
+app.get('/dialogflow/webhook', (req, res) => {
+  res.send('Rota do webhook funcionando!');
+})

@@ -1,11 +1,10 @@
-// Arquivo responsável por lidar com a comunicação com a API do OpenWeather.
 const axios = require('axios');
 
-const OPENWEATHER_API_KEY = "df14a1c749ccf8b676d262f974c23bfd";
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY; // Use a chave do ambiente
 
 async function getWeather(location) {
     try {
-        const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+        const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?g=${location}&units=imperial&appid=${OPENWEATHER_API_KEY}`, {
             params: {
                 q: location,
                 appid: OPENWEATHER_API_KEY,
@@ -26,3 +25,5 @@ async function getWeather(location) {
 }
 
 module.exports = { getWeather };
+
+
