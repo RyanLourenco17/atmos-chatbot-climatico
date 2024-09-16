@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dialogflow": "^1.2.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.6.1",
+    "moongoose": "^0.0.5",
+    "ngrok": "^5.0.0-beta.2",
+    "nodemon": "^3.1.4"
+  },
+  "devDependencies": {
+    "eslint": "^9.10.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./config/db.js localhost:8000"
+  }
+}
