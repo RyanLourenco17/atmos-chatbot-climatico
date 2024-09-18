@@ -5,7 +5,7 @@ const { getWeather } = require('../config/WeatherService'); // Ajuste o caminho 
 const router = express.Router();
 
 router.post('/webhook', async (req, res) => {
-  if(intentName == 'PrevisãoDoTempo'){
+  if(intentName == 'Temperatura'){
     var cidade = request.body.queryResult.parameters['Cidade'];
     helper.getCurrentWeatherByCityName(""+cidade+"", (err, currentWeather) => {
      if(err){

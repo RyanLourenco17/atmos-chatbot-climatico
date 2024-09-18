@@ -1,10 +1,11 @@
-import Sidebar from "../components/Sidebar/Sidebar"
+import  MenuSide  from "../components/Sidebar/MenuSide"
+
 
 
 const NewConversation = () => {
   return (
     <>
-        <Sidebar/>
+      <MenuSide />
     </>
   )
 }
