@@ -12,3 +12,8 @@
   --white-color: #FFF0FE;
   --neutral-color: #FFF0FE;
 }
+
+
+body{
+  background-color: var(--black-color);
+}
