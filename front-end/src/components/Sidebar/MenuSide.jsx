@@ -4,9 +4,12 @@ import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
 import atmosLogo from '../../assets/Atmos.png';
 
+import ModalConfig from '../Modal/ModalConfig';
+
 const MenuSide = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false); // Estado para controle em telas menores
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -14,6 +17,14 @@ const MenuSide = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileOpen(!isMobileOpen);
+  };
+
+  const handleOpenSettingsModal = () => {
+    setShowSettingsModal(true); 
+  };
+
+  const handleCloseSettingsModal = () => {
+    setShowSettingsModal(false);
   };
 
   return (
@@ -75,7 +86,7 @@ const MenuSide = () => {
           </div>
 
           <div className="menu-section">
-            <div className="menu-item">
+            <div className="menu-item" onClick={handleOpenSettingsModal}>
               <Gear className="icon" />
               {!isCollapsed && <span>CONFIGURAÇÕES</span>}
             </div>
@@ -86,6 +97,7 @@ const MenuSide = () => {
           </div>
         </div>
       </div>
+      <ModalConfig show={showSettingsModal} handleClose={handleCloseSettingsModal} />
     </div>
   );
 };

@@ -14,7 +14,7 @@
 }
 
 .sidebar.collapsed {
-    width: 9%; /* Largura quando colapsada */
+    width: 9%;
 }
 
 .toggle-button {
@@ -23,6 +23,7 @@
     justify-content: flex-end;
     padding: 10px;
 }
+
 
 .toggle-icon {
     font-size: 30px;
