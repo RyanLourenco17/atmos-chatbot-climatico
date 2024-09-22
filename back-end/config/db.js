@@ -19,6 +19,7 @@ dotenv.config();
 const authRoute = require('../routes/AuthRoute');
 const userRoute = require('../routes/UserRoute');
 const dialogflowRoute = require('../routes/DialogFlowRoute')
+const hello = require('../routes/hello');
 
 // middlewares
 const verifyToken = require('../middlewares/VerificarToken');
@@ -27,6 +28,7 @@ const verifyToken = require('../middlewares/VerificarToken');
 // app.use('/auth', authRoute);
 // app.use('/users', userRoute);
 app.use('/dialogflow', dialogflowRoute);
+app.use('/hello', hello)
 
 // Configurando  o servidor e a porta  do Express.js
 const dbName = 'Atmos';
@@ -50,3 +52,5 @@ app.listen(port, () => {
 app.get('/dialogflow/webhook', (req, res) => {
   res.send('Rota do webhook funcionando!');
 })
+
+
