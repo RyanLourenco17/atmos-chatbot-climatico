@@ -1,0 +1,16 @@
+.grid-card{
+    display: flex;
+    gap: 1rem;
+    width: 35vw;
+    flex-wrap: wrap;
+}
+
+.card-body{
+    border: 2px solid var(--primary-color);
+    width: 170px;
+    padding: 1rem;
+    border-radius: .5rem;
+    color: var(--primary-color);
+    font-family: 'Oxygen';
+    text-align: justify;
+}

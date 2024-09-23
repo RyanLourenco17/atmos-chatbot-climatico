@@ -49,7 +49,7 @@ app.listen(port, () => {
 });
 
 // Testando rota
-app.get('/dialogflow/webhook', (req, res) => {
+app.get('/webhook/dialogflow', (req, res) => {
   res.send('Rota do webhook funcionando!');
 })
 

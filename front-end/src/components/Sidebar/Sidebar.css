@@ -1,12 +1,9 @@
-* {
-    font-family: 'Rubik Mono One';
-}
-
 .sidebar {
+    font-family: 'Rubik Mono One';
     background-color: #232323;
     color: var(--white-color);
     height: 100vh;
-    width: 21%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     padding: .5rem 1rem;
@@ -14,7 +11,7 @@
 }
 
 .sidebar.collapsed {
-    width: 9%;
+    width: 100%;
 }
 
 .toggle-button {

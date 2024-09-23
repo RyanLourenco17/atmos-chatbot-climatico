@@ -1,0 +1,49 @@
+.page-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10rem;
+}
+  
+.content-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+  
+.interactive-area {
+  position: fixed;
+  bottom: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+  
+.componentTextarea {
+  flex: 1;
+  position: relative;
+}
+
+
+@media (max-width: 768px) {
+  .page-container {
+    flex-direction: column;
+  }
+
+  .grid-card, 
+  .componentTextarea {
+    width: 100%; 
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .input-text {
+    width: 100%; 
+  }
+}
+  
+
+
+  

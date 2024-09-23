@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
   },
   theme: {
     type: String,
-    enum: ['Padrão', 'Claro', 'Acessível'],
+    enum: ['Padrão', 'Acessível'],
     default: 'Padrão',
   },
   createdAt: {
