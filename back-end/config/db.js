@@ -25,9 +25,9 @@ const hello = require('../routes/hello');
 const verifyToken = require('../middlewares/VerificarToken');
 
 // Chamando as rotas
-// app.use('/auth', authRoute);
+app.use('/api/auth', authRoute);
 // app.use('/users', userRoute);
-app.use('/dialogflow', dialogflowRoute);
+// app.use('/dialogflow', dialogflowRoute);
 app.use('/hello', hello)
 
 // Configurando  o servidor e a porta  do Express.js
