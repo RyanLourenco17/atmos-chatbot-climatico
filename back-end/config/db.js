@@ -25,8 +25,8 @@ const hello = require('../routes/hello');
 const verifyToken = require('../middlewares/VerificarToken');
 
 // Chamando as rotas
-app.use('/auth', authRoute);
-app.use('/user', verifyToken, userRoute);
+app.use('/api/auth', authRoute);
+app.use('/api/user', verifyToken, userRoute);
 // app.use('/dialogflow', verifyToken, dialogflowRoute);
 app.use('/hello', hello);
 
