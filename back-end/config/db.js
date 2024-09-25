@@ -30,9 +30,9 @@ app.use('/hello', hello);
 
 // Configurando o servidor e a porta do Express.js
 const port = 8000;
-const DB_USER = process.env.DB_USER || 'lourencoryan94'; // Usar valor padrão se não estiver definido
-const DB_PASS = process.env.DB_PASS || 'B27uBjN1m9lI7MDW'; // Usar valor padrão se não estiver definido
-const DB_NAME = 'ATMOS'; // Nome do banco de dados
+const DB_USER = process.env.DB_USER;
+const DB_PASS = process.env.DB_PASS;
+const DB_NAME = 'ATMOS';
 
 // Conectando com o Banco de dados
 mongoose
