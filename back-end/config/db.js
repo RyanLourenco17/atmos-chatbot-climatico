@@ -7,7 +7,9 @@ const { getWeather } = require('./WeatherService');
 const app = express();
 
 app.use(cors({
-  origin: 'https://atmos-chatbot-climatico.vercel.app/'
+  origin: 'https://atmos-chatbot-climatico.vercel.app/',
+  methods: ['GET','POST', 'DELETE, UPDATE'],
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.static('public'));
@@ -52,4 +54,7 @@ app.listen(port, () => {
 app.get('/webhook/dialogflow', (req, res) => {
   res.send('Rota do webhook funcionando!');
 });
+
+
+
 
