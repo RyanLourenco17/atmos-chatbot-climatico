@@ -4,13 +4,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Rota para registrar usuário
+// Cadastro do usuário
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { name, email, password } = req.body;
 
   console.log(req.body);
 
-  if (!username || !email || !password) {
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
   }
 
@@ -25,20 +25,25 @@ router.post('/register', async (req, res) => {
 
   // Instancia um novo usuário
   const user = new User({
-    username: username,
+    name: name,
     email: email,
     password: passwordHash,
   });
 
   try {
+    const secret = process.env.JWT_SECRET || "nossosecret";
+
     const newUser = await user.save();
+
+    const token = jwt.sign({name: newUser.name, id: newUser._id}, secret)
+
     res.status(201).json({ message: 'Você realizou o cadastro com sucesso!' });
   } catch (error) {
     res.status(400).json({ error });
   }
 });
 
-// Rota para entrar com um usuário
+// Autenticação de Login
 router.post('/login', async (req, res) => {
   const secret = process.env.JWT_SECRET || "nossosecret";
   const { email, password } = req.body;
@@ -55,6 +60,8 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Senha inválida!' });
   }
 
-  const token = jwt.sign({ username: user.username, id: user._id }, secret, { expiresIn: '1h' });
+  const token = jwt.sign({ name: user.name, id: user._id, }, secret);
   res.json({ message: 'Você está autenticado!', token, userId: user._id });
 });
+
+module.exports = router;

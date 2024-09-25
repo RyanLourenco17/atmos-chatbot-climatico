@@ -10,6 +10,7 @@
   transform: translate(-50%, -50%);
 }
 
+
 .custom-tabs, .custom-button{
   font-family: 'Rubik Mono One';
 }
@@ -80,6 +81,12 @@
   margin-top: 0.25rem;
 }
 
+.alert {
+  background-color: rgb(255, 70, 70, 0.4);
+  color: var(--white-color);
+  border: none;
+}
+
 
 
 .custom-button {
@@ -98,6 +105,7 @@
   background-color: var(--primary-color);
   color: var(--black-color);
   box-shadow: 0 0 15px var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 

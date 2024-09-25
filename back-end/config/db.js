@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const { getWeather } = require('./WeatherService');
 
@@ -9,8 +8,7 @@ const app = express();
 
 app.use(cors({
   origin: 'https://atmos-chatbot-climatico.vercel.app/'
-}
-));
+}));
 app.use(express.json());
 app.use(express.static('public'));
 dotenv.config();
@@ -18,27 +16,29 @@ dotenv.config();
 // Importando Rotas
 const authRoute = require('../routes/AuthRoute');
 const userRoute = require('../routes/UserRoute');
-const dialogflowRoute = require('../routes/DialogFlowRoute')
+const dialogflowRoute = require('../routes/DialogFlowRoute');
 const hello = require('../routes/hello');
 
-// middlewares
+// Middlewares
 const verifyToken = require('../middlewares/VerificarToken');
 
 // Chamando as rotas
 app.use('/api/auth', authRoute);
-// app.use('/users', userRoute);
-// app.use('/dialogflow', dialogflowRoute);
-app.use('/hello', hello)
+app.use('/api/user', verifyToken, userRoute);
+// app.use('/dialogflow', verifyToken, dialogflowRoute);
+app.use('/hello', hello);
 
-// Configurando  o servidor e a porta  do Express.js
-const dbName = 'Atmos';
+// Configurando o servidor e a porta do Express.js
 const port = 8000;
+const DB_USER = process.env.DB_USER || 'lourencoryan94'; // Usar valor padrão se não estiver definido
+const DB_PASS = process.env.DB_PASS || 'B27uBjN1m9lI7MDW'; // Usar valor padrão se não estiver definido
+const DB_NAME = 'ATMOS'; // Nome do banco de dados
 
 // Conectando com o Banco de dados
 mongoose
-  .connect(`mongodb://localhost/${dbName}`)
+  .connect(`mongodb+srv://${DB_USER}:${DB_PASS}@cluster0.rslx3.mongodb.net/${DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`)
   .then(() => {
-    console.log(`Conectado ao banco de dados ${dbName}`);
+    console.log(`Conectado ao banco de dados ${DB_NAME}`);
   })
   .catch((err) => {
     console.error('Erro ao conectar com o banco de dados:', err);
@@ -51,6 +51,8 @@ app.listen(port, () => {
 // Testando rota
 app.get('/webhook/dialogflow', (req, res) => {
   res.send('Rota do webhook funcionando!');
-})
+});
+
+
 
 

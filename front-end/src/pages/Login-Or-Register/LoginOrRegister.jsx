@@ -1,12 +1,15 @@
-import { useState } from 'react';
-import { Tabs, Tab, Form } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Tabs, Tab, Form, Button } from 'react-bootstrap';
 import { validateEmail } from '../../validations/validateEmail';
 import { validateRequired } from '../../validations/validateRequired';
+import { useNavigate } from 'react-router-dom';
 import './LoginOrRegister.css';
 
 const LoginOrRegister = () => {
+  const navigate = useNavigate();
   const [key, setKey] = useState('login');
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState('');
 
   const [loginForm, setLoginForm] = useState({
     email: '',
@@ -14,36 +17,108 @@ const LoginOrRegister = () => {
   });
 
   const [registerForm, setRegisterForm] = useState({
-    username: '',
+    name: '',
     email: '',
     password: ''
   });
 
-  const handleLoginSubmit = (e) => {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        setKey((prevKey) => (prevKey === 'login' ? 'register' : 'login'));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validações
-    newErrors.email = validateEmail(loginForm.email);
-    newErrors.password = validateRequired(loginForm.password, 'Senha');
+    const emailError = validateEmail(loginForm.email);
+    const passwordError = validateRequired(loginForm.password, 'Senha');
+    if (emailError) newErrors.email = emailError;
+    if (passwordError) newErrors.password = passwordError;
 
     setErrors(newErrors);
 
-    // Se não houver erros, continue com a lógica de login
+    if (Object.keys(newErrors).length === 0) {
+      try {
+        const response = await fetch('http://localhost:8000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: loginForm.email,
+            password: loginForm.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setMessage(data.message);
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userId', data.userId);
+          navigate('/nova-conversa');
+        } else {
+          setMessage(data.error);
+        }
+      } catch (error) {
+        setMessage('Ocorreu um erro ao fazer login. Tente novamente mais tarde.');
+        console.error('Erro ao fazer login:', error);
+      }
+    }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validações
-    newErrors.username = validateRequired(registerForm.username, 'Nome de Usuário');
-    newErrors.email = validateEmail(registerForm.email);
-    newErrors.password = validateRequired(registerForm.password, 'Senha');
+    const nameError = validateRequired(registerForm.name, 'Nome');
+    const emailError = validateEmail(registerForm.email);
+    const passwordError = validateRequired(registerForm.password, 'Senha');
+    if (nameError) newErrors.name = nameError;
+    if (emailError) newErrors.email = emailError;
+    if (passwordError) newErrors.password = passwordError;
 
     setErrors(newErrors);
 
-    // Se não houver erros, continue com a lógica de cadastro
+    if (Object.keys(newErrors).length === 0) {
+      try {
+        const response = await fetch('http://localhost:8000/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: registerForm.name,
+            email: registerForm.email,
+            password: registerForm.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setMessage(data.message);
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userId', data.userId);
+          navigate('/nova-conversa');
+        } else {
+          setMessage(data.error);
+        }
+      } catch (error) {
+        setMessage('Ocorreu um erro ao fazer o cadastro. Tente novamente mais tarde.');
+        console.error('Erro ao fazer cadastro:', error);
+      }
+    }
   };
 
   return (
@@ -84,7 +159,7 @@ const LoginOrRegister = () => {
               {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </Form.Floating>
 
-            <button className="custom-button">Entrar</button>
+            <Button type="submit" className="custom-button">Entrar</Button>
           </Form>
         </Tab>
 
@@ -93,15 +168,15 @@ const LoginOrRegister = () => {
           <Form className="custom-form" onSubmit={handleRegisterSubmit}>
             <Form.Floating className="mb-3">
               <Form.Control
-                id="formUsernameRegister"
+                id="formNameRegister"
                 type="text"
-                className={`custom-input ${errors.username ? 'is-invalid' : ''}`}
-                placeholder="Digite seu nome de usuário"
-                value={registerForm.username}
-                onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
+                className={`custom-input ${errors.name ? 'is-invalid' : ''}`}
+                placeholder="Digite seu nome"
+                value={registerForm.name}
+                onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
               />
-              <Form.Label className='label' htmlFor="formUsernameRegister">Nome de Usuário</Form.Label>
-              {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+              <Form.Label className='label' htmlFor="formNameRegister">Nome</Form.Label>
+              {errors.name && <div className="invalid-feedback">{errors.name}</div>}
             </Form.Floating>
 
             <Form.Floating className="mb-3">
@@ -122,15 +197,17 @@ const LoginOrRegister = () => {
                 id="formPasswordRegister"
                 type="password"
                 className={`custom-input ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="Crie uma senha"
+                placeholder="Digite sua senha"
                 value={registerForm.password}
                 onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
               />
               <Form.Label className='label' htmlFor="formPasswordRegister">Senha</Form.Label>
               {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </Form.Floating>
+            
+            {message && <div className="alert alert-info">{message}</div>}
 
-            <button className="custom-button">Cadastrar</button>
+            <Button type="submit" className="custom-button">Cadastrar</Button>
           </Form>
         </Tab>
       </Tabs>
@@ -139,10 +216,4 @@ const LoginOrRegister = () => {
 };
 
 export default LoginOrRegister;
-
-
-
-
-
-
 

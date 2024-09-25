@@ -1,6 +1,7 @@
 import CardSugestion from "../components/CardSugestion/CardSugestion";
 import MenuSide from "../components/Sidebar/MenuSide";
 import TextareaQuestion from "../components/TextareaQuestion/TextareaQuestion";
+import Loading from "../components/LoadingWave/Loading"
 import './NewConversation.css';
 
 const NewConversation = () => {
@@ -9,6 +10,7 @@ const NewConversation = () => {
       <MenuSide />
       <div className="content-container">
         <div className="interactive-area">
+          <Loading/>
           <CardSugestion />
           <TextareaQuestion />
         </div>
