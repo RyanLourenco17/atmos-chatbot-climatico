@@ -11,6 +11,14 @@ app.use(cors({
   methods: ['GET', 'POST', 'DELETE', 'UPDATE'],
   credentials: true
 }));
+
+// Suporte para preflight requests
+app.options('*', cors());
+
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Rota funcionando com CORS habilitado!' });
+});
+
 app.use(express.json());
 app.use(express.static('public'));
 dotenv.config();
@@ -31,7 +39,7 @@ app.use('/api/user', verifyToken, userRoute);
 app.use('/hello', hello);
 
 // Configurando o servidor e a porta do Express.js
-const port = 8000;
+const port = process.env.PORT || 8000;
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;
 const DB_NAME = 'ATMOS';
