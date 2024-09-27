@@ -49,7 +49,7 @@ const LoginOrRegister = () => {
 
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await fetch('https://atmos-chatbot-climatico-t7no.vercel.app/api/auth/login', {
+        const response = await fetch('https://atmos-chatbot-climatico.onrender.com/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const LoginOrRegister = () => {
 
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await fetch('https://atmos-chatbot-climatico-t7no.vercel.app/api/auth/register', {
+        const response = await fetch('https://atmos-chatbot-climatico.onrender.com/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
