@@ -58,11 +58,7 @@ app.listen(port, () => {
   console.log(`O backend está rodando na porta ${port}`);
 });
 
-// Testando rota
-app.get('/webhook/dialogflow', (req, res) => {
-  res.send('Rota do webhook funcionando!');
+
+app.get("/", (req, res) => {
+  res.json({ message: "Rota teste." });
 });
-
-
-
-
