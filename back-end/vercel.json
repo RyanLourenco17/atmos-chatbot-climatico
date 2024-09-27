@@ -1,7 +1,10 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/hello", "destination": "/routes/hello" }
+    { "source": "/hello", "destination": "/routes/hello" },
+    { "source": "/api/auth/(.*)", "destination": "/api/auth/$1" },
+    { "source": "/api/user/(.*)", "destination": "/api/user/$1" }
   ]
 }
+
 
