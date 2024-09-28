@@ -15,9 +15,6 @@ app.use(cors({
 // Suporte para preflight requests
 app.options('*', cors());
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Rota funcionando com CORS habilitado!' });
-});
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -61,4 +58,12 @@ app.listen(port, () => {
 
 app.get("/", (req, res) => {
   res.json({ message: "Rota teste." });
+});
+
+app.get("/auth/register", (req, res) => {
+  res.json({message: "Rota de cadastro"});
+});
+
+app.get("/auth/register", (req, res) => {
+  res.json({message: "Rota de login"});
 });
