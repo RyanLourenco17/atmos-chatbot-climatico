@@ -36,7 +36,7 @@ app.use('/user', verifyToken, userRoute);
 app.use('/hello', hello);
 
 // Configurando o servidor e a porta do Express.js
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 10000;
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;
 const DB_NAME = 'ATMOS';
@@ -64,6 +64,6 @@ app.get("/auth/register", (req, res) => {
   res.json({message: "Rota de cadastro"});
 });
 
-app.get("/auth/register", (req, res) => {
+app.get("/auth/login", (req, res) => {
   res.json({message: "Rota de login"});
 });
