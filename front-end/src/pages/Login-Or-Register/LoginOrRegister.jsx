@@ -51,7 +51,6 @@ const LoginOrRegister = () => {
       try {
         const response = await fetch('https://atmos-chatbot-climatico.onrender.com/auth/login', {
           method: 'POST',
-          mode: 'no-cors',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -95,7 +94,6 @@ const LoginOrRegister = () => {
       try {
         const response = await fetch('https://atmos-chatbot-climatico.onrender.com/auth/register', {
           method: 'POST',
-          mode: 'no-cors',
           headers: {
             'Content-Type': 'application/json',
           },
