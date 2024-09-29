@@ -15,10 +15,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Suporte para preflight requests
-app.options('/:path*', cors(corsOptions)); // Para qualquer rota dinâmica com o parâmetro :path*
-
-
 
 app.use(express.json());
 app.use(express.static('public'));

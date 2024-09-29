@@ -1,6 +1,9 @@
 {
-  "rewrites":  [
-    {"source": "/(.*)", "destination": "/"}
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://atmos-chatbot-climatico.onrender.com/:path*"
+    }
   ]
 }
   
