@@ -1,14 +1,6 @@
 {
-  "rewrites": [
-    {
-      "source": "/auth/:path*",  
-      "destination": "https://atmos-chatbot-climatico.onrender.com/auth/:path*" 
-    },
-    {
-      "source": "/api/:path*",  
-      "destination": "https://atmos-chatbot-climatico.onrender.com/:path*"  
-    }
+  "rewrites":  [
+    {"source": "/(.*)", "destination": "/"}
   ]
 }
-
   
