@@ -7,9 +7,9 @@ const { getWeather } = require('./WeatherService');
 const app = express();
 
 const corsOptions = {
-  origin: ['https://atmos-chatbot-climatico.vercel.app'], // Lista de origens permitidas
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Métodos permitidos
-  allowedHeaders: ['Authorization', 'Content-Type'], // Cabeçalhos permitidos
+  origin: ['https://atmos-chatbot-climatico.vercel.app/'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
   credentials: true,
 };
 
