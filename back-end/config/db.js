@@ -7,7 +7,7 @@ const { getWeather } = require('./WeatherService');
 const app = express();
 
 const corsOptions = {
-  origin: ['https://atmos-chatbot-climatico.vercel.app/'],
+  origin: ['https://atmos-chatbot-climatico.vercel.app', 'http://127.0.0.1:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Authorization', 'Content-Type'],
   credentials: true,
@@ -37,7 +37,7 @@ app.use('/api/user', verifyToken, userRoute);
 app.use('/hello', hello);
 
 // Configurando o servidor e a porta do Express.js
-const port = process.env.PORT || 10000;
+const port = process.env.PORT;
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;
 const DB_NAME = 'ATMOS';
@@ -61,10 +61,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Rota teste." });
 });
 
-app.get("/auth/register", (req, res) => {
+app.get("/api/auth/register", (req, res) => {
   res.json({message: "Rota de cadastro"});
 });
 
-app.get("/auth/login", (req, res) => {
+app.get("/api/auth/login", (req, res) => {
   res.json({message: "Rota de login"});
 });
