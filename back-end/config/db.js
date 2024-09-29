@@ -6,16 +6,18 @@ const { getWeather } = require('./WeatherService');
 
 const app = express();
 
-app.use(cors({
-  origin: 'https://atmos-chatbot-climatico.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTION'],
-  allowedHeaders: ['Authorization', 'Content-Type'],
-  credentials: true
-}));
+const corsOptions = {
+  origin: ['https://atmos-chatbot-climatico.vercel.app'], // Lista de origens permitidas
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Métodos permitidos
+  allowedHeaders: ['Authorization', 'Content-Type'], // Cabeçalhos permitidos
+  credentials: true,
+};
 
+app.use(cors(corsOptions));
 
 // Suporte para preflight requests
-app.options('*', cors());
+app.options('/:path*', cors(corsOptions)); // Para qualquer rota dinâmica com o parâmetro :path*
+
 
 
 app.use(express.json());
