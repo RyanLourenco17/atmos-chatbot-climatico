@@ -41,6 +41,8 @@ const LoginOrRegister = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     const newErrors = {};
 
     const emailError = validateEmail(loginForm.email);
@@ -85,6 +87,8 @@ const LoginOrRegister = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     const newErrors = {};
 
     const nameError = validateRequired(registerForm.name, 'Nome');
