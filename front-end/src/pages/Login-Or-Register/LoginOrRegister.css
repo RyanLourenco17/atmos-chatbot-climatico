@@ -11,6 +11,13 @@
 }
 
 
+.loading{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .custom-tabs, .custom-button{
   font-family: 'Rubik Mono One';
 }
