@@ -10,7 +10,7 @@ const helper = new OpenWeatherMapHelper({
 });
 
 // Rota para o Dialogflow
-router.post("/Dialogflow",  async (req, res) => {
+app.post("/Dialogflow",  async (req, res) => {
   var intentName = request.body.queryResult.intent.displayName;
 
   switch(intentName) {
