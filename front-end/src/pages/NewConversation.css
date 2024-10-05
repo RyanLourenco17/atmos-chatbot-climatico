@@ -1,7 +1,7 @@
 .page-container {
   display: flex;
   justify-content: space-between;
-  gap: 10rem;
+  /* gap: 10rem; */
 }
   
 .content-container {
@@ -9,12 +9,14 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  /* background-color: rebeccapurple; */
+  margin: 1rem 10rem;
 }
   
 .interactive-area {
   position: fixed;
   bottom: 10px;
-  padding: 10px;
+  /* padding: 10px; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,6 +32,10 @@
 @media (max-width: 768px) {
   .page-container {
     flex-direction: column;
+  }
+
+  .content-container{
+    margin: 0;
   }
 
   .grid-card, 

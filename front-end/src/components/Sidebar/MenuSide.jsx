@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
@@ -10,6 +10,7 @@ const MenuSide = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false); // Estado para controle em telas menores
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [conversations, setConversations] = useState([]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -26,6 +27,25 @@ const MenuSide = () => {
   const handleCloseSettingsModal = () => {
     setShowSettingsModal(false);
   };
+
+  // Busca o histórico de conversas
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/conversations", {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const data = await response.json();
+        setConversations(data); // Supondo que a resposta seja uma lista de conversas
+      } catch (error) {
+        console.error("Erro ao buscar conversas:", error);
+      }
+    };
+
+    fetchConversations();
+  }, []);
 
   return (
     <div>
@@ -64,9 +84,11 @@ const MenuSide = () => {
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-                <div className="conversation-item">QUAL SERÁ A UMIDA...</div>
-                <div className="conversation-item">COMO ESTÁ O VENTO...</div>
-                <div className="conversation-item">ME MOSTRE O CLIMA...</div>
+                {conversations.map(conversation => (
+                  <div key={conversation.id} className="conversation-item">
+                    {conversation.title} {/* Exibe o título da conversa */}
+                  </div>
+                  ))}
               </div>
             )}
           </div>
