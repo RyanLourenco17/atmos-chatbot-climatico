@@ -10,8 +10,8 @@ const helper = new OpenWeatherMapHelper({
 });
 
 // Rota para o Dialogflow
-app.post("/Dialogflow",  async (req, res) => {
-  var intentName = request.body.queryResult.intent.displayName;
+router.post("/Dialogflow",  async (req, res) => {
+  var intentName = req.body.queryResult.intent.displayName;
 
   switch(intentName) {
     case "Teste":
@@ -19,7 +19,7 @@ app.post("/Dialogflow",  async (req, res) => {
       break;
 
     case "Temperatura":
-      var cidade = request.body.queryResult.parameters['Cidade'];
+      var cidade = req.body.queryResult.parameters['Cidade'];
       helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
         if(err){
           console.log(err);
