@@ -13,7 +13,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
   const parameters = req.body.queryResult.parameters;
-  const cidade = parameters['Cidade'];
+  const cidade = request.body.queryResult.parameters['Cidade'];
 
   // Cria uma nova conversa ou atualiza uma existente
   let conversation = await Conversation.findOne({ userId });
