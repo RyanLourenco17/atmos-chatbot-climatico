@@ -13,7 +13,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
   const parameters = req.body.queryResult.parameters;
-  const cidade = request.body.queryResult.parameters['Cidade'];
+  const cidade = req.body.queryResult.parameters['Cidade']; // Corrigido aqui
 
   // Cria uma nova conversa ou atualiza uma existente
   let conversation = await Conversation.findOne({ userId });
@@ -78,6 +78,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
       res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
   }
 });
+
 
 
 // Rota para obter conversas do usuário pelo ID
