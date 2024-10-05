@@ -10,7 +10,7 @@ const helper = new OpenWeatherMapHelper({
 });
 
 // Rota para o Dialogflow
-router.post("/Dialogflow", async (req, res) => {
+router.post("/Dialogflow", verifyToken, async (req, res) => {
   const userId = req.userId; // Obter o ID do usuário do token
   const intentName = req.body.queryResult.intent.displayName;
   const cidade = req.body.queryResult.parameters['Cidade'];
