@@ -10,60 +10,92 @@ const helper = new OpenWeatherMapHelper({
 });
 
 // Rota para o Dialogflow
-router.post("/Dialogflow",  async (req, res) => {
-  var intentName = req.body.queryResult.intent.displayName;
+router.post("/Dialogflow", async (req, res) => {
+  const userId = req.userId; // Obter o ID do usuário do token
+  const intentName = req.body.queryResult.intent.displayName;
+  const cidade = req.body.queryResult.parameters['Cidade'];
 
-  switch(intentName) {
+  // Cria uma nova conversa ou atualiza uma existente
+  let conversation = await Conversation.findOne({ userId });
+
+  if (!conversation) {
+    conversation = new Conversation({
+      userId,
+      messages: [],
+    });
+  }
+
+  switch (intentName) {
     case "Teste":
-      res.json({ "fulfillmentText" : "Este teste funciona" });
+      const testResponse = "Este teste funciona";
+      conversation.messages.push({
+        question: "Teste",
+        answer: testResponse,
+        role: 'sistema',
+        status: 'respondida',
+      });
+      await conversation.save(); // Salvar a conversa
+      res.json({ "fulfillmentText": testResponse });
       break;
 
     case "Temperatura":
-      var cidade = req.body.queryResult.parameters['Cidade'];
-      helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
-        if(err){
+      if (!cidade) {
+        res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });
+        return;
+      }
+
+      // Chama a API do OpenWeather
+      helper.getCurrentWeatherByCityName(cidade, async (err, currentWeather) => {
+        if (err) {
           console.log(err);
           res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
-        }
-        else {
+        } else {
           // Extraindo os dados do OpenWeather
-          var temperaturaAtual = parseInt(currentWeather.main.temp);
-          var tempMax = parseInt(currentWeather.main.temp_max);
-          var tempMin = parseInt(currentWeather.main.temp_min);
-          var umidade = parseInt(currentWeather.main.humidity);
-          var velocidadeVento = parseInt(currentWeather.wind.speed);
-          var pressao = currentWeather.main.pressure;
-          var descricaoClima = currentWeather.weather[0].description;
-          var visibilidade = currentWeather.visibility;
-          var nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
-          var porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
+          const temperaturaAtual = parseInt(currentWeather.main.temp);
+          const tempMax = parseInt(currentWeather.main.temp_max);
+          const tempMin = parseInt(currentWeather.main.temp_min);
+          const umidade = parseInt(currentWeather.main.humidity);
+          const velocidadeVento = parseInt(currentWeather.wind.speed);
+          const pressao = currentWeather.main.pressure;
+          const descricaoClima = currentWeather.weather[0].description;
+          const visibilidade = currentWeather.visibility;
+          const nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
+          const porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
+          const dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
 
-          // Convertendo o Unix timestamp para data e hora local
-          var dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
+          const resposta =
+            "Cidade: " + currentWeather.name + "\n" +
+            "Data e Hora: " + dataHora + "\n" +
+            "Temperatura Atual: " + temperaturaAtual + "º" + "\n" +
+            "Temperatura Máxima: " + tempMax + "º" + "\n" +
+            "Temperatura Mínima: " + tempMin + "º" + "\n" +
+            "Umidade: " + umidade + "%" + "\n" +
+            "Velocidade do vento: " + velocidadeVento + "km/h" + "\n" +
+            "Pressão Atmosférica: " + pressao + " hPa" + "\n" +
+            "Descrição do clima: " + descricaoClima + "\n" +
+            "Visibilidade: " + visibilidade + " metros" + "\n" +
+            "Nascer do sol: " + nascerDoSol + "\n" +
+            "Pôr do sol: " + porDoSol;
 
-          res.json({
-            "fulfillmentText":
-              "Cidade: " + currentWeather.name + "\n" +
-              "Data e Hora: " + dataHora + "\n" +
-              "Temperatura Atual: " + temperaturaAtual + "º" + "\n" +
-              "Temperatura Máxima: " + tempMax + "º" + "\n" +
-              "Temperatura Mínima: " + tempMin + "º" + "\n" +
-              "Umidade: " + umidade + "%" + "\n" +
-              "Velocidade do vento: " + velocidadeVento + "km/h" + "\n" +
-              "Pressão Atmosférica: " + pressao + " hPa" + "\n" +
-              "Descrição do clima: " + descricaoClima + "\n" +
-              "Visibilidade: " + visibilidade + " metros" + "\n" +
-              "Nascer do sol: " + nascerDoSol + "\n" +
-              "Pôr do sol: " + porDoSol
+          // Adiciona a resposta no banco e atualiza o status
+          conversation.messages.push({
+            question: cidade,
+            answer: resposta,
+            role: 'sistema',
+            status: 'respondida',
           });
+
+          await conversation.save(); // Salvar a conversa
+
+          res.json({ "fulfillmentText": resposta });
         }
       });
       break;
-      default:
+
+    default:
       res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
   }
 });
-
 
 // Rota para obter conversas do usuário pelo ID
 router.get('/conversas/:id', verifyToken, async (req, res) => {
@@ -85,3 +117,4 @@ router.get('/conversas/:id', verifyToken, async (req, res) => {
 });
 
 module.exports = router;
+
