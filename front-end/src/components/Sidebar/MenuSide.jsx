@@ -32,7 +32,7 @@ const MenuSide = () => {
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/conversations", {
+        const response = await fetch("https://atmos-chatbot-climatico-backend.onrender.com/api/conversations", {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem('token')}`,
           },

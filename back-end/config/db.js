@@ -32,7 +32,7 @@ app.use(express.static('public'));
 // Chamando as rotas
 app.use('/api/auth', authRoute);
 app.use('/api/user', verifyToken, userRoute);
-app.use('/api/dialogflow', verifyToken, dialogflowRoute);
+app.use('/api/dialogflow', dialogflowRoute);
 app.use('/hello', hello);
 
 // Configurando o servidor e a porta do Express.js

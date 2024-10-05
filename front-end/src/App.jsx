@@ -13,7 +13,7 @@ function App() {
       <Routes>
         <Route path='/nova-conversa' element={<NewConversation />} />
         <Route path='/' element={<LoginOrRegister />} />
-        <Route path='/conversa/:id' element={<ConversationPage />} /> {/* Parâmetro de ID da conversa */}
+        <Route path='/conversa/:id' element={<ConversationPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -15,7 +15,7 @@ const ConversationPage = () => {
     const fetchConversation = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:8000/api/conversations/${id}`, {
+        const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/conversations/${id}`, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem('token')}`,
           },
