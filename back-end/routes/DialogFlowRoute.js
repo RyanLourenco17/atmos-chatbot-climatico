@@ -97,13 +97,13 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
   }
 });
 
-// Rota para obter conversas do usuário pelo ID
-router.get('/conversas/:id', verifyToken, async (req, res) => {
-  const { id } = req.params;
+// Rota para obter todas as conversas do usuário
+router.get('/conversas', verifyToken, async (req, res) => {
+  const userId = req.userId;
 
   try {
     // Busca todas as conversas associadas ao ID do usuário
-    const conversas = await Conversation.find({ userId: id }).sort({ createdAt: -1 });
+    const conversas = await Conversation.find({ userId }).sort({ createdAt: -1 });
 
     if (!conversas.length) {
       return res.status(404).json({ message: 'Nenhuma conversa encontrada.' });
@@ -113,6 +113,26 @@ router.get('/conversas/:id', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Erro ao buscar conversas:', error);
     return res.status(500).json({ message: 'Erro ao buscar as conversas.' });
+  }
+});
+
+// Rota para obter uma conversa específica pelo ID
+router.get('/conversas/:id', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.userId; // Obter o ID do usuário do token
+
+  try {
+    // Busca a conversa pelo ID e verifica se pertence ao usuário
+    const conversa = await Conversation.findOne({ _id: id, userId });
+
+    if (!conversa) {
+      return res.status(404).json({ message: 'Conversa não encontrada.' });
+    }
+
+    return res.json(conversa);
+  } catch (error) {
+    console.error('Erro ao buscar a conversa:', error);
+    return res.status(500).json({ message: 'Erro ao buscar a conversa.' });
   }
 });
 
