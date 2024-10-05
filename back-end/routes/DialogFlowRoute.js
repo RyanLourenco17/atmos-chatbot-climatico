@@ -15,7 +15,7 @@ router.post("/Dialogflow",  async (req, res) => {
 
   switch(intentName) {
     case "Teste":
-      response.json({ "fulfillmentText" : "Este teste funciona" });
+      res.json({ "fulfillmentText" : "Este teste funciona" });
       break;
 
     case "Temperatura":
@@ -23,7 +23,7 @@ router.post("/Dialogflow",  async (req, res) => {
       helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
         if(err){
           console.log(err);
-          response.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
+          res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
         }
         else {
           // Extraindo os dados do OpenWeather
@@ -41,7 +41,7 @@ router.post("/Dialogflow",  async (req, res) => {
           // Convertendo o Unix timestamp para data e hora local
           var dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
 
-          response.json({
+          res.json({
             "fulfillmentText":
               "Cidade: " + currentWeather.name + "\n" +
               "Data e Hora: " + dataHora + "\n" +
@@ -60,7 +60,7 @@ router.post("/Dialogflow",  async (req, res) => {
       });
       break;
       default:
-      response.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
+      res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
   }
 });
 
