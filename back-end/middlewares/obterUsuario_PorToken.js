@@ -20,5 +20,6 @@ const getUserByToken = async (token) => {
   }
 };
 
+
 module.exports = getUserByToken;
 

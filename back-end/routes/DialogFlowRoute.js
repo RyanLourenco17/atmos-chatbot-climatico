@@ -9,11 +9,12 @@ const helper = new OpenWeatherMapHelper({
   units: "metric",
 });
 
+// Rota para o Dialogflow
 router.post("/Dialogflow", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
   const parameters = req.body.queryResult.parameters;
-  const cidade = req.body.queryResult.parameters['Cidade']; // Corrigido aqui
+  const cidade = parameters['Cidade']; // Certifique-se de que o parâmetro está correto
 
   // Cria uma nova conversa ou atualiza uma existente
   let conversation = await Conversation.findOne({ userId });
@@ -27,7 +28,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
 
   // Adiciona a mensagem de pergunta no banco
   conversation.messages.push({
-    question: cidade,
+    question: cidade || "Pergunta não fornecida",
     role: 'usuário',
     status: 'pendente',
   });
@@ -36,8 +37,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
 
   switch (intentName) {
     case "Teste":
-      res.json({ "fulfillmentText": "Este teste funciona" });
-      break;
+      return res.json({ "fulfillmentText": "Este teste funciona" });
 
     case "Temperatura":
       if (!cidade) {
@@ -47,80 +47,53 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
       // Chama a API do OpenWeather
       helper.getCurrentWeatherByCityName(cidade, async (err, currentWeather) => {
         if (err) {
-          console.log(err);
-          res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
-        } else {
-          // Extraindo os dados do OpenWeather
-          var temperaturaAtual = parseInt(currentWeather.main.temp);
-          var tempMax = parseInt(currentWeather.main.temp_max);
-          var tempMin = parseInt(currentWeather.main.temp_min);
-          var umidade = parseInt(currentWeather.main.humidity);
-          var velocidadeVento = parseInt(currentWeather.wind.speed);
-          var pressao = currentWeather.main.pressure;
-          var descricaoClima = currentWeather.weather[0].description;
-          var visibilidade = currentWeather.visibility;
-          var nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
-          var porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
-
-          // Convertendo o Unix timestamp para data e hora local
-          var dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
-
-          const resposta =
-            `Cidade: ${currentWeather.name}\n` +
-            `Data e Hora: ${dataHora}\n` +
-            `Temperatura Atual: ${temperaturaAtual}ºC\n` +
-            `Temperatura Máxima: ${tempMax}ºC\n` +
-            `Temperatura Mínima: ${tempMin}ºC\n` +
-            `Umidade: ${umidade}%\n` +
-            `Velocidade do vento: ${velocidadeVento}km/h\n` +
-            `Pressão Atmosférica: ${pressao} hPa\n` +
-            `Descrição do clima: ${descricaoClima}\n` +
-            `Visibilidade: ${visibilidade} metros\n` +
-            `Nascer do sol: ${nascerDoSol}\n` +
-            `Pôr do sol: ${porDoSol}`;
-
-          // Adiciona a resposta no banco e atualiza o status
-          conversation.messages.push({
-            answer: resposta,
-            role: 'sistema',
-            status: 'respondida',
-          });
-
-          await conversation.save();
-
-          res.json({
-            "fulfillmentText": resposta
-          });
+          console.error(err); // Melhorei a mensagem de log para ser mais clara
+          return res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
         }
+
+        const temperaturaAtual = Math.round(currentWeather.main.temp); // Arredondando a temperatura
+        const descricaoClima = currentWeather.weather[0].description;
+
+        const resposta = `Cidade: ${currentWeather.name}\n` +
+                         `Temperatura Atual: ${temperaturaAtual}ºC\n` +
+                         `Descrição do clima: ${descricaoClima}`;
+
+        // Adiciona a resposta no banco e atualiza o status
+        conversation.messages.push({
+          answer: resposta,
+          role: 'sistema',
+          status: 'respondida',
+        });
+
+        await conversation.save();
+
+        return res.json({
+          "fulfillmentText": resposta
+        });
       });
-      break;
 
     default:
-      res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
+      return res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
   }
 });
 
-
-
 // Rota para obter conversas do usuário pelo ID
 router.get('/conversas/:id', verifyToken, async (req, res) => {
-  const { id } = req.params; // Obtém o ID do usuário a partir do parâmetro da URL
+  const { id } = req.params;
 
   try {
-    // Busca todas as conversas associadas ao id do usuário
+    // Busca todas as conversas associadas ao ID do usuário
     const conversas = await Conversation.find({ userId: id }).sort({ createdAt: -1 });
 
     if (!conversas.length) {
       return res.status(404).json({ message: 'Nenhuma conversa encontrada.' });
     }
 
-    res.json(conversas);
+    return res.json(conversas);
   } catch (error) {
     console.error('Erro ao buscar conversas:', error);
-    res.status(500).json({ message: 'Erro ao buscar as conversas.' });
+    return res.status(500).json({ message: 'Erro ao buscar as conversas.' });
   }
 });
-
-
 
 module.exports = router;
