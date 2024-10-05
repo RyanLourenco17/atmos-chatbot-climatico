@@ -50,13 +50,34 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
           console.log(err);
           res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
         } else {
-          const temperaturaAtual = parseInt(currentWeather.main.temp);
-          const descricaoClima = currentWeather.weather[0].description;
+          // Extraindo os dados do OpenWeather
+          var temperaturaAtual = parseInt(currentWeather.main.temp);
+          var tempMax = parseInt(currentWeather.main.temp_max);
+          var tempMin = parseInt(currentWeather.main.temp_min);
+          var umidade = parseInt(currentWeather.main.humidity);
+          var velocidadeVento = parseInt(currentWeather.wind.speed);
+          var pressao = currentWeather.main.pressure;
+          var descricaoClima = currentWeather.weather[0].description;
+          var visibilidade = currentWeather.visibility;
+          var nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
+          var porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
+
+          // Convertendo o Unix timestamp para data e hora local
+          var dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
 
           const resposta =
             `Cidade: ${currentWeather.name}\n` +
+            `Data e Hora: ${dataHora}\n` +
             `Temperatura Atual: ${temperaturaAtual}ºC\n` +
-            `Descrição do clima: ${descricaoClima}`;
+            `Temperatura Máxima: ${tempMax}ºC\n` +
+            `Temperatura Mínima: ${tempMin}ºC\n` +
+            `Umidade: ${umidade}%\n` +
+            `Velocidade do vento: ${velocidadeVento}km/h\n` +
+            `Pressão Atmosférica: ${pressao} hPa\n` +
+            `Descrição do clima: ${descricaoClima}\n` +
+            `Visibilidade: ${visibilidade} metros\n` +
+            `Nascer do sol: ${nascerDoSol}\n` +
+            `Pôr do sol: ${porDoSol}`;
 
           // Adiciona a resposta no banco e atualiza o status
           conversation.messages.push({
