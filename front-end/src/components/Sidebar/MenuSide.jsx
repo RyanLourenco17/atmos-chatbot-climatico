@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; 
 import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
@@ -32,13 +32,13 @@ const MenuSide = () => {
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const response = await fetch("https://atmos-chatbot-climatico-backend.onrender.com/api/conversations", {
+        const response = await fetch("https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/conversas", {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem('token')}`,
           },
         });
         const data = await response.json();
-        setConversations(data); // Supondo que a resposta seja uma lista de conversas
+        setConversations(data);
       } catch (error) {
         console.error("Erro ao buscar conversas:", error);
       }
@@ -86,9 +86,9 @@ const MenuSide = () => {
               <div className="conversation-list scrollable-section">
                 {conversations.map(conversation => (
                   <div key={conversation.id} className="conversation-item">
-                    {conversation.title} {/* Exibe o título da conversa */}
+                    {conversation.question} {/* Exibe a pergunta da conversa */}
                   </div>
-                  ))}
+                ))}
               </div>
             )}
           </div>
@@ -125,3 +125,4 @@ const MenuSide = () => {
 };
 
 export default MenuSide;
+
