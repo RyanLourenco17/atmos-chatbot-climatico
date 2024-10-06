@@ -136,6 +136,7 @@ router.get('/conversas', verifyToken, async (req, res) => {
 });
 
 
+
 // Rota para obter uma conversa específica pelo ID
 router.get('/conversas/:id', verifyToken, async (req, res) => {
   const { id } = req.params;

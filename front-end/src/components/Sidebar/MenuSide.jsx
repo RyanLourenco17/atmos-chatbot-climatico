@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'; 
+import { useEffect, useState } from 'react';  
 import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
@@ -8,9 +8,9 @@ import ModalConfig from '../Modal/ModalConfig';
 
 const MenuSide = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false); // Estado para controle em telas menores
+  const [isMobileOpen, setIsMobileOpen] = useState(false); 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [conversations, setConversations] = useState([]);
+  const [conversations, setConversations] = useState([]); // Estado para armazenar conversas
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -28,23 +28,28 @@ const MenuSide = () => {
     setShowSettingsModal(false);
   };
 
-  // Busca o histórico de conversas
-  useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const response = await fetch("https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/conversas", {
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        const data = await response.json();
-        setConversations(data);
-      } catch (error) {
-        console.error("Erro ao buscar conversas:", error);
+  // Função para buscar as conversas do usuário
+  const fetchConversations = async () => {
+    try {
+      const response = await fetch('/api/conversas', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Erro ao buscar conversas.');
       }
-    };
+      const data = await response.json();
+      setConversations(data);
+    } catch (error) {
+      console.error('Erro:', error);
+    }
+  };
 
-    fetchConversations();
+  useEffect(() => {
+    fetchConversations(); 
   }, []);
 
   return (
@@ -85,8 +90,8 @@ const MenuSide = () => {
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
                 {conversations.map(conversation => (
-                  <div key={conversation.id} className="conversation-item">
-                    {conversation.question} {/* Exibe a pergunta da conversa */}
+                  <div key={conversation._id} className="conversation-item">
+                    {conversation.messages.length > 0 && conversation.messages[0].question} {/* Mostra a primeira pergunta da conversa */}
                   </div>
                 ))}
               </div>
@@ -125,4 +130,5 @@ const MenuSide = () => {
 };
 
 export default MenuSide;
+
 
