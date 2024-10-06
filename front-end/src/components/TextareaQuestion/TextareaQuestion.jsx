@@ -19,7 +19,7 @@ const TextareaQuestion = ({ onNewMessage, conversationId }) => {
     
     try {
       // Faz a requisição POST
-      const response = await fetch(`http://localhost:8000/api/conversations/${conversationId}/messages`, {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/api/dialogflow/Dialogflow`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
