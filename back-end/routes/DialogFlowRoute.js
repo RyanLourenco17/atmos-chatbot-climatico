@@ -12,7 +12,7 @@ const helper = new OpenWeatherMapHelper({
 
 // Rota para o Dialogflow
 router.post("/Dialogflow", verifyToken, async (req, res) => {
-  const userId = req.userId; // ID do usuário extraído do token
+  const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
   const cidade = req.body.queryResult.parameters['Cidade'];
 
@@ -128,7 +128,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
-  const userId = req.userId; // ID do usuário extraído do token
+  const userId = req.userId;
 
   try {
     const consultations = await Consultation.find({ user: userId }).populate('conversations');
@@ -146,7 +146,7 @@ router.get('/consultas', verifyToken, async (req, res) => {
 
 // Rota para pegar informações detalhadas de uma consulta específica
 router.get('/consultas/:id', verifyToken, async (req, res) => {
-  const userId = req.userId; // ID do usuário extraído do token
+  const userId = req.userId;
   const consultationId = req.params.id; // ID da consulta
 
   try {
