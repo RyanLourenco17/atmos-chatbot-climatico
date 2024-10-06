@@ -51,14 +51,17 @@ const ConversationPage = () => {
         <div className="conversation-area">
           <div className="conversation-display">
             {conversations.map((conversation, index) => (
-              <div key={index} className={conversation.type === 'question' ? 'question' : 'answer'}>
+              <div 
+                key={index} 
+                className={conversation.type === 'question' ? 'question' : 'answer'}
+              >
                 {conversation.type === 'question' ? (
-                  <p>{conversation.text}</p>
+                  <p className="question-text">{conversation.text}</p>
                 ) : (
-                  <>
+                  <div className="answer-wrapper">
                     <img src={mascoteImg} alt="Mascote" />
-                    <p>{conversation.text}</p>
-                  </>
+                    <p className="answer-text">{conversation.text}</p>
+                  </div>
                 )}
               </div>
             ))}
@@ -76,3 +79,4 @@ const ConversationPage = () => {
 };
 
 export default ConversationPage;
+
