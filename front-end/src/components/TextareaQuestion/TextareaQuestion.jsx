@@ -8,37 +8,41 @@ const TextareaQuestion = ({ onNewMessage }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!question) return;
-
-    // Adiciona a pergunta ao histórico local
-    onNewMessage({ type: 'question', text: question });
-
+    if (!question.trim()) return; // Garante que a pergunta não está vazia
+  
+    onNewMessage({ type: 'question', text: question }); // Adiciona localmente
+  
     setLoading(true);
-    
+  
     try {
-      // Faz a requisição POST para o backend
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Token não encontrado.');
+  
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/Dialogflow`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ text: question }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Erro ao enviar a mensagem');
       }
-
+  
       const data = await response.json();
-
-      // Adiciona a resposta ao histórico local
-      onNewMessage({ type: 'answer', text: data.fulfillmentText });
+  
+      if (data.fulfillmentText) {
+        onNewMessage({ type: 'answer', text: data.fulfillmentText }); // Adiciona a resposta do backend
+      } else {
+        throw new Error('Resposta inválida do servidor');
+      }
     } catch (error) {
       console.error('Erro ao enviar a pergunta:', error);
     } finally {
       setLoading(false);
-      setQuestion(''); // Limpa o input após envio
+      setQuestion(''); // Limpa o campo de input
     }
   };
 
