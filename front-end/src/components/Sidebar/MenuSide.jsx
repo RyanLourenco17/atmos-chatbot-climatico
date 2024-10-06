@@ -30,7 +30,7 @@ const MenuSide = () => {
   // Função para buscar as consultas do usuário
 const fetchConsultations = async () => {
   try {
-    const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/consultas', {
+    const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`, // Pega o token do localStorage
