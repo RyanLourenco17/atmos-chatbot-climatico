@@ -31,7 +31,7 @@ const MenuSide = () => {
   // Função para buscar as conversas do usuário
   const fetchConversations = async () => {
     try {
-      const response = await fetch('/api/conversas', {
+      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/conversas', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`, 
