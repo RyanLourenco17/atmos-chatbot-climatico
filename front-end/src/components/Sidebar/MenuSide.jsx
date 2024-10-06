@@ -3,14 +3,13 @@ import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
 import atmosLogo from '../../assets/Atmos.png';
-
 import ModalConfig from '../Modal/ModalConfig';
 
 const MenuSide = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false); 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [conversations, setConversations] = useState([]); // Estado para armazenar conversas
+  const [consultas, setConsultas] = useState([]); // Estado para armazenar consultas
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -28,28 +27,33 @@ const MenuSide = () => {
     setShowSettingsModal(false);
   };
 
-  // Função para buscar as conversas do usuário
-  const fetchConversations = async () => {
-    try {
-      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/conversas', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, 
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Erro ao buscar conversas.');
-      }
-      const data = await response.json();
-      setConversations(data);
-    } catch (error) {
-      console.error('Erro:', error);
+  // Função para buscar as consultas do usuário
+const fetchConsultations = async () => {
+  try {
+    const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/consultas', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Pega o token do localStorage
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Erro ao buscar consultas.');
     }
-  };
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      setConsultas(data); // Atualiza o estado apenas se o dado for um array válido
+    } else {
+      setConsultas([]); // Se o dado não for um array, zera o estado
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+};
+
 
   useEffect(() => {
-    fetchConversations(); 
+    fetchConsultations(); // Chama a função ao montar o componente
   }, []);
 
   return (
@@ -66,7 +70,6 @@ const MenuSide = () => {
 
       {/* Sidebar principal */}
       <div className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
-        {/* Botão de alternância só será exibido em telas maiores */}
         <div className="toggle-button" onClick={toggleSidebar}>
           <SquareHalf className="toggle-icon" />
         </div>
@@ -85,13 +88,15 @@ const MenuSide = () => {
           <div className="menu-section">
             <div className="menu-item">
               <ClockHistory className="icon" />
-              {!isCollapsed && <span>CONVERSAS</span>}
+              {!isCollapsed && <span>CONSULTAS</span>}
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-                {conversations.map(conversation => (
-                  <div key={conversation._id} className="conversation-item">
-                    {conversation.messages.length > 0 && conversation.messages[0].question} {/* Mostra a primeira pergunta da conversa */}
+                {consultas.map(consulta => (
+                  <div key={consulta._id} className="conversation-item">
+                    {consulta.conversations.length > 0 && consulta.conversations[0].messages.length > 0
+                      ? consulta.conversations[0].messages[0].question
+                      : "Sem perguntas ainda"}
                   </div>
                 ))}
               </div>

@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
-const Conversation = require('../models/Conversation');
-const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
 
 const helper = new OpenWeatherMapHelper({
@@ -126,57 +124,48 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
   }
 });
 
-// Rota para obter todas as consultas do usuário
+
+// Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
-  const userId = req.userId;
+  const userId = req.userId; // ID do usuário extraído do token
 
   try {
-    // Busca todas as consultas do usuário e popula as conversas e mensagens
-    const consultas = await Consultation.find({ user: userId })
-      .sort({ createdAt: -1 })
-      .populate({
-        path: 'conversations',
-        populate: {
-          path: 'messages',
-        },
-      });
+    const consultations = await Consultation.find({ user: userId }).populate('conversations');
 
-    if (!consultas.length) {
-      return res.status(404).json({ message: 'Nenhuma consulta encontrada.' });
+    if (!consultations || consultations.length === 0) {
+      return res.status(404).json({ message: 'Nenhuma consulta encontrada para este usuário.' });
     }
 
-    return res.json(consultas);
+    res.json(consultations);
   } catch (error) {
     console.error('Erro ao buscar consultas:', error);
-    return res.status(500).json({ message: 'Erro ao buscar as consultas.' });
+    res.status(500).json({ message: 'Erro ao buscar consultas.' });
   }
 });
 
-// Rota para obter uma consulta específica pelo ID
+// Rota para pegar informações detalhadas de uma consulta específica
 router.get('/consultas/:id', verifyToken, async (req, res) => {
-  const { id } = req.params;
-  const userId = req.userId; // Obter o ID do usuário do token
+  const userId = req.userId; // ID do usuário extraído do token
+  const consultationId = req.params.id; // ID da consulta
 
   try {
-    // Busca a consulta pelo ID e verifica se pertence ao usuário
-    const consulta = await Consultation.findOne({ _id: id, user: userId })
+    const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
       .populate({
         path: 'conversations',
-        populate: {
-          path: 'messages',
-        },
+        populate: { path: 'messages' }
       });
 
-    if (!consulta) {
-      return res.status(404).json({ message: 'Consulta não encontrada.' });
+    if (!consultation) {
+      return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });
     }
 
-    return res.json(consulta);
+    res.json(consultation);
   } catch (error) {
-    console.error('Erro ao buscar a consulta:', error);
-    return res.status(500).json({ message: 'Erro ao buscar a consulta.' });
+    console.error('Erro ao buscar consulta:', error);
+    res.status(500).json({ message: 'Erro ao buscar consulta.' });
   }
 });
+
 
 module.exports = router;
 

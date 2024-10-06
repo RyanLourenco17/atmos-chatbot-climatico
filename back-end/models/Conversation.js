@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const MessageSchema = require('./Message');
-const ConsultationSchema = require('./Consultation')
 
 const ConversationSchema = new mongoose.Schema({
   consultation: {

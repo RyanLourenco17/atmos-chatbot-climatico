@@ -7,7 +7,6 @@ const MessageSchema = new mongoose.Schema({
   },
   answer: {
     type: String,
-    required: false,
   },
   createdAt: {
     type: Date,
