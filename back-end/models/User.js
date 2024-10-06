@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['Padrão', 'Acessível'],
     default: 'Padrão',
   },
+  conversations: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Conversation',
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
