@@ -66,10 +66,6 @@
     border-radius: 50%;
 }
 
-.interactive-area {
-    width: 100%;
-}
-
 .loading {
     text-align: center;
     color: var(--white-color);

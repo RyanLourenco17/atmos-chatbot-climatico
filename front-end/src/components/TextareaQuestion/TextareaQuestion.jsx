@@ -1,12 +1,10 @@
 import { useState } from 'react'; 
 import { MicFill, Send } from 'react-bootstrap-icons';
-import { useNavigate } from 'react-router-dom';
 import './Textarea.css';
 
-const TextareaQuestion = ({ onNewMessage, conversationId }) => {
+const TextareaQuestion = ({ onNewMessage }) => {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Hook para navegar entre as páginas
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,11 +12,11 @@ const TextareaQuestion = ({ onNewMessage, conversationId }) => {
 
     // Adiciona a pergunta ao histórico local
     onNewMessage({ type: 'question', text: question });
-    
+
     setLoading(true);
     
     try {
-      // Faz a requisição POST https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/Dialogflow
+      // Faz a requisição POST para o backend
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/Dialogflow`, {
         method: 'POST',
         headers: {
@@ -34,16 +32,13 @@ const TextareaQuestion = ({ onNewMessage, conversationId }) => {
 
       const data = await response.json();
 
-      // Adiciona a resposta do backend ao histórico de conversas
+      // Adiciona a resposta ao histórico local
       onNewMessage({ type: 'answer', text: data.fulfillmentText });
-
-      // Navega para a página de conversa após enviar a mensagem
-      navigate(`/conversa/${conversationId}`);
     } catch (error) {
       console.error('Erro ao enviar a pergunta:', error);
     } finally {
       setLoading(false);
-      setQuestion('');
+      setQuestion(''); // Limpa o input após envio
     }
   };
 
@@ -66,5 +61,6 @@ const TextareaQuestion = ({ onNewMessage, conversationId }) => {
 };
 
 export default TextareaQuestion;
+
 
 
