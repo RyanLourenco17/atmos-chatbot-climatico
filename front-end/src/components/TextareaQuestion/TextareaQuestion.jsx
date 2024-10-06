@@ -18,8 +18,8 @@ const TextareaQuestion = ({ onNewMessage, conversationId }) => {
     setLoading(true);
     
     try {
-      // Faz a requisição POST
-      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/api/dialogflow/Dialogflow`, {
+      // Faz a requisição POST https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/Dialogflow
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/Dialogflow`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
