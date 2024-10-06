@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
+const Conversation = require('../models/Conversation');
 const verifyToken = require('../middlewares/VerificarToken');
 
 const helper = new OpenWeatherMapHelper({
