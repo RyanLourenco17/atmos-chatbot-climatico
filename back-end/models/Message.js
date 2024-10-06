@@ -9,16 +9,6 @@ const MessageSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  role: {
-    type: String,
-    enum: ['usuário', 'sistema'],
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ['pendente', 'respondida', 'erro'],
-    default: 'pendente',
-  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const MessageSchema = require('./Message');
+const ConsultationSchema = require('./Consultation')
 
 const ConversationSchema = new mongoose.Schema({
-  user: {
+  consultation: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Consultation',
     required: true,
   },
   messages: [{

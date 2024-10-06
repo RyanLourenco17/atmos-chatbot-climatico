@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const OpenWeatherMapHelper = require("openweathermap-node");
+const Consultation = require('../models/Consultation');
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
@@ -17,14 +18,29 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
   const cidade = req.body.queryResult.parameters['Cidade'];
 
   try {
-    // Encontra ou cria uma nova conversa para o usuário
-    let conversation = await Conversation.findOne({ user: userId });
+    // Encontra ou cria uma nova consulta para o usuário
+    let consultation = await Consultation.findOne({ user: userId }).populate('conversations');
 
-    if (!conversation) {
-      conversation = new Conversation({
+    if (!consultation) {
+      consultation = new Consultation({
         user: userId,
-        messages: [],
+        conversations: [],
       });
+      await consultation.save();
+    }
+
+    // Encontra ou cria uma nova conversa na consulta
+    let conversation = consultation.conversations.length > 0
+      ? consultation.conversations[consultation.conversations.length - 1]
+      : new Conversation({
+          consultation: consultation._id,
+          messages: [],
+        });
+
+    if (!conversation._id) {
+      await conversation.save();
+      consultation.conversations.push(conversation._id);
+      await consultation.save();
     }
 
     let newMessage;
@@ -37,8 +53,6 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
         newMessage = new Message({
           question: "Teste",
           answer: testResponse,
-          role: 'sistema',
-          status: 'respondida',
         });
         await newMessage.save();
 
@@ -90,9 +104,7 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
             // Cria a mensagem para a conversa
             newMessage = new Message({
               question: cidade,
-              answer: resposta,
-              role: 'sistema',
-              status: 'respondida',
+              answer: resposta
             });
             await newMessage.save();
 
@@ -114,50 +126,58 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
   }
 });
 
-// Rota para obter todas as conversas do usuário
-router.get('/conversas', verifyToken, async (req, res) => {
+// Rota para obter todas as consultas do usuário
+router.get('/consultas', verifyToken, async (req, res) => {
   const userId = req.userId;
 
   try {
-    // Busca todas as conversas do usuário e popula o campo 'messages' com os detalhes das mensagens
-    const conversas = await Conversation.find({ user: userId })
+    // Busca todas as consultas do usuário e popula as conversas e mensagens
+    const consultas = await Consultation.find({ user: userId })
       .sort({ createdAt: -1 })
-      .populate('messages'); // Popula as mensagens associadas à conversa
+      .populate({
+        path: 'conversations',
+        populate: {
+          path: 'messages',
+        },
+      });
 
-    if (!conversas.length) {
-      return res.status(404).json({ message: 'Nenhuma conversa encontrada.' });
+    if (!consultas.length) {
+      return res.status(404).json({ message: 'Nenhuma consulta encontrada.' });
     }
 
-    return res.json(conversas);
+    return res.json(consultas);
   } catch (error) {
-    console.error('Erro ao buscar conversas:', error);
-    return res.status(500).json({ message: 'Erro ao buscar as conversas.' });
+    console.error('Erro ao buscar consultas:', error);
+    return res.status(500).json({ message: 'Erro ao buscar as consultas.' });
   }
 });
 
-
-
-// Rota para obter uma conversa específica pelo ID
-router.get('/conversas/:id', verifyToken, async (req, res) => {
+// Rota para obter uma consulta específica pelo ID
+router.get('/consultas/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const userId = req.userId; // Obter o ID do usuário do token
 
   try {
-    // Busca a conversa pelo ID, verifica se pertence ao usuário, e popula o campo 'messages'
-    const conversa = await Conversation.findOne({ _id: id, user: userId })
-      .populate('messages'); // Popula as mensagens associadas à conversa
+    // Busca a consulta pelo ID e verifica se pertence ao usuário
+    const consulta = await Consultation.findOne({ _id: id, user: userId })
+      .populate({
+        path: 'conversations',
+        populate: {
+          path: 'messages',
+        },
+      });
 
-    if (!conversa) {
-      return res.status(404).json({ message: 'Conversa não encontrada.' });
+    if (!consulta) {
+      return res.status(404).json({ message: 'Consulta não encontrada.' });
     }
 
-    return res.json(conversa);
+    return res.json(consulta);
   } catch (error) {
-    console.error('Erro ao buscar a conversa:', error);
-    return res.status(500).json({ message: 'Erro ao buscar a conversa.' });
+    console.error('Erro ao buscar a consulta:', error);
+    return res.status(500).json({ message: 'Erro ao buscar a consulta.' });
   }
 });
 
-
 module.exports = router;
+
 
