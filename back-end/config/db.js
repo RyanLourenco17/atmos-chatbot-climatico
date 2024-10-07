@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 // Importando Rotas
 const authRoute = require('../routes/AuthRoute');
 const userRoute = require('../routes/UserRoute');
-const dialogflowRoute = require('../routes/DialogFlowRoute'); // Certifique-se de que o caminho está correto
+const dialogflowRoute = require('../routes/DialogFlowRoute');
 const hello = require('../routes/hello');
 
 // Middlewares
