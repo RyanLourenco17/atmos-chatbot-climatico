@@ -3,7 +3,7 @@ const router = express.Router();
 const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
 const Conversation = require('../models/Conversation');
-const Message = require("../models/Message")
+const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
 
 const helper = new OpenWeatherMapHelper({
@@ -12,7 +12,7 @@ const helper = new OpenWeatherMapHelper({
 });
 
 // Rota para o Dialogflow
-router.post("/Dialogflow", verifyToken, async (req, res) => {
+router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
   const cidade = req.body.queryResult.parameters['Cidade'];
@@ -22,20 +22,14 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
     let consultation = await Consultation.findOne({ user: userId }).populate('conversations');
 
     if (!consultation) {
-      consultation = new Consultation({
-        user: userId,
-        conversations: [],
-      });
+      consultation = new Consultation({ user: userId, conversations: [] });
       await consultation.save();
     }
 
     // Encontra ou cria uma nova conversa na consulta
     let conversation = consultation.conversations.length > 0
       ? consultation.conversations[consultation.conversations.length - 1]
-      : new Conversation({
-          consultation: consultation._id,
-          messages: [],
-        });
+      : new Conversation({ consultation: consultation._id, messages: [] });
 
     if (!conversation._id) {
       await conversation.save();
@@ -50,15 +44,18 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
         const testResponse = "Este teste funciona";
 
         // Cria uma nova mensagem e salva no banco de dados
-        newMessage = new Message({
-          question: "Teste",
-          answer: testResponse,
-        });
+        newMessage = new Message({ question: "Teste", answer: testResponse });
         await newMessage.save();
 
         // Adiciona a mensagem à conversa
         conversation.messages.push(newMessage._id);
-        await conversation.save(); // Salva a conversa com a nova mensagem
+        await conversation.save();
+
+        // Define o nome da consulta se ele ainda não foi definido
+        if (!consultation.name) {
+          consultation.name = newMessage.question;
+          await consultation.save();
+        }
 
         res.json({ "fulfillmentText": testResponse });
         break;
@@ -102,15 +99,18 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
               "Pôr do sol: " + porDoSol;
 
             // Cria a mensagem para a conversa
-            newMessage = new Message({
-              question: cidade,
-              answer: resposta
-            });
+            newMessage = new Message({ question: cidade, answer: resposta });
             await newMessage.save();
 
             // Adiciona a mensagem à conversa
             conversation.messages.push(newMessage._id);
-            await conversation.save(); // Salva a conversa
+            await conversation.save();
+
+            // Define o nome da consulta com base na primeira pergunta
+            if (!consultation.name) {
+              consultation.name = newMessage.question;
+              await consultation.save();
+            }
 
             res.json({ "fulfillmentText": resposta });
           }
@@ -125,7 +125,6 @@ router.post("/Dialogflow", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Houve um erro ao processar sua solicitação." });
   }
 });
-
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
@@ -168,7 +167,23 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
   }
 });
 
+// Rota para deletar uma consulta específica
+router.delete('/consultas/:id', verifyToken, async (req, res) => {
+  const userId = req.userId;
+  const consultationId = req.params.id; // ID da consulta
+
+  try {
+    const consultation = await Consultation.findOneAndDelete({ _id: consultationId, user: userId });
+
+    if (!consultation) {
+      return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });
+    }
+
+    res.json({ message: 'Consulta deletada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao deletar consulta:', error);
+    res.status(500).json({ message: 'Erro ao deletar consulta.' });
+  }
+});
 
 module.exports = router;
-
-

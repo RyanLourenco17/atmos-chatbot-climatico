@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const ConsultationSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    default: '',
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -8,12 +12,9 @@ const ConsultationSchema = new mongoose.Schema({
   },
   conversations: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Conversation'
+    ref: 'Conversation',
   }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Consultation', ConsultationSchema);

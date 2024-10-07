@@ -11,7 +11,8 @@
 }
 
 .sidebar.collapsed {
-    width: 100%;
+    width: 5rem;
+    transition: width 0.3s ease-in-out;
 }
 
 .toggle-button {
@@ -35,7 +36,7 @@
 }
 
 .mascote {
-    height: 62px;
+    height: 50px;
 }
 
 .logo-text {
@@ -80,12 +81,18 @@
     justify-content: space-between;
 }
 
-.menu-item {
+.menu-item{
     display: flex;
     align-items: center;
     gap: 1rem;
     padding: 10px;
+    border-radius: 4px;
     cursor: pointer;
+}
+
+.menu-item:hover{
+    background-color: var(--white-color);
+    color: var(--black-color);
 }
 
 .menu-item .icon {

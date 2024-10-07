@@ -41,7 +41,7 @@ const LoginOrRegister = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const newErrors = {};
 
@@ -87,7 +87,7 @@ const LoginOrRegister = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const newErrors = {};
 
