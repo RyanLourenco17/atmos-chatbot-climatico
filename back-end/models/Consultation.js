@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const ConsultationSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    default: '',
-  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

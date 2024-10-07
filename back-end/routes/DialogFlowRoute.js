@@ -3,7 +3,7 @@ const router = express.Router();
 const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
 const Conversation = require('../models/Conversation');
-const Message = require("../models/Consultation");
+const Message = require("../models/Conversation");
 const verifyToken = require('../middlewares/VerificarToken');
 
 const helper = new OpenWeatherMapHelper({
@@ -50,12 +50,6 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
         // Adiciona a mensagem à conversa
         conversation.messages.push(newMessage._id);
         await conversation.save();
-
-        // Define o nome da consulta se ele ainda não foi definido
-        if (!consultation.name) {
-          consultation.name = newMessage.question;
-          await consultation.save();
-        }
 
         res.json({ "fulfillmentText": testResponse });
         break;
@@ -105,12 +99,6 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
             // Adiciona a mensagem à conversa
             conversation.messages.push(newMessage._id);
             await conversation.save();
-
-            // Define o nome da consulta com base na primeira pergunta
-            if (!consultation.name) {
-              consultation.name = newMessage.question;
-              await consultation.save();
-            }
 
             res.json({ "fulfillmentText": resposta });
           }
