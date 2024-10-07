@@ -42,7 +42,8 @@ router.put('/:id', verifyToken, async (req, res) => {
     const updateData = {
       name: req.body.name,
       email: req.body.email,
-      theme: req.body.theme,  // Adiciona a troca de tema
+      theme: req.body.theme,
+      password: req.body.password  // Adiciona a troca de tema
     };
 
     // Verifica se uma nova senha foi fornecida

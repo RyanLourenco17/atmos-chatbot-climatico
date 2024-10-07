@@ -1,20 +1,108 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-import './Modal.css'
+import './Modal.css';
 
 const ModalConfig = ({ show, handleClose }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [theme, setTheme] = useState('light');
+  const [password, setPassword] = useState('');
+  const [userId, setUserId] = useState(null);
+  const [token, setToken] = useState('');
   const navigate = useNavigate();
 
-  const handleSave = () => {
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUserId = localStorage.getItem('userId');
+    setToken(storedToken);
+    setUserId(storedUserId);
 
+    // Requisição GET para preencher o formulário
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${storedUserId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-    navigate('/configuracoes-salvas');
-    handleClose(); // Fecha o modal
+        const data = await response.json();
+        if (response.ok) {
+          setUsername(data.user.name);
+          setEmail(data.user.email);
+          setTheme(data.user.theme);
+          setPassword('');
+        } else {
+          console.error(data.error);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+      }
+    };
+
+    if (show) {
+      fetchUserData(); 
+    }
+  }, [show, token]); // Adicionado `token` como dependência
+
+  // Atualizar informações
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: username,
+          email: email,
+          theme: theme,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Dados atualizados com sucesso!');
+        alert('Dados atualizados com sucesso!');
+      } else {
+        console.error(data.error);
+        alert('Erro ao atualizar dados.');
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar os dados:", error);
+      alert("Erro ao atualizar os dados.");
+    }
+  };
+
+  // Deletar conta
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.clear();
+        navigate('/');
+      } else {
+        const data = await response.json();
+        console.error(data.error);
+        alert('Erro ao deletar conta.');
+      }
+    } catch (error) {
+      console.error("Erro ao deletar a conta:", error);
+      alert("Erro ao deletar a conta.");
+    }
   };
 
   return (
@@ -50,16 +138,25 @@ const ModalConfig = ({ show, handleClose }) => {
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
             >
-              <option value="light">Claro</option>
-              <option value="dark">Escuro</option>
-              <option value="blue">Azul</option>
+              <option value="default">Padrão</option>
+              <option value="accessible">Acessível</option>
             </Form.Select>
+          </Form.Group>
+
+          <Form.Group controlId="formPassword" className="mt-3">
+            <Form.Label>Senha</Form.Label>
+            <Form.Control
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Atualize sua senha"
+            />
           </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button className='btn cancel' onClick={handleClose}>
-          Cancelar
+        <Button className='btn delete' onClick={handleDeleteAccount}>
+          Deletar Conta
         </Button>
         <Button className='btn update' onClick={handleSave}>
           Salvar
@@ -70,3 +167,5 @@ const ModalConfig = ({ show, handleClose }) => {
 };
 
 export default ModalConfig;
+
+
