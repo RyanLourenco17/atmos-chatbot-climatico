@@ -6,6 +6,8 @@ const MessageSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+module.exports = mongoose.model('Message', MessageSchema);
+
 const ConversationSchema = new mongoose.Schema({
   messages: [MessageSchema],
   createdAt: { type: Date, default: Date.now },
