@@ -28,29 +28,28 @@ const MenuSide = () => {
   };
 
   // Função para buscar as consultas do usuário
-const fetchConsultations = async () => {
-  try {
-    const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Pega o token do localStorage
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!response.ok) {
-      throw new Error('Erro ao buscar consultas.');
+  const fetchConsultations = async () => {
+    try {
+      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Pega o token do localStorage
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Erro ao buscar consultas.');
+      }
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setConsultas(data); // Atualiza o estado apenas se o dado for um array válido
+      } else {
+        setConsultas([]);
+      }
+    } catch (error) {
+      console.error('Erro:', error);
     }
-    const data = await response.json();
-    if (Array.isArray(data)) {
-      setConsultas(data); // Atualiza o estado apenas se o dado for um array válido
-    } else {
-      setConsultas([]); // Se o dado não for um array, zera o estado
-    }
-  } catch (error) {
-    console.error('Erro:', error);
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchConsultations(); // Chama a função ao montar o componente
@@ -82,7 +81,7 @@ const fetchConsultations = async () => {
         <div className="menu">
           <div className="menu-item">
             <PencilSquare className="icon" />
-            {!isCollapsed && <span>NOVA CONVERSA</span>}
+            {!isCollapsed && <span>NOVA CONSULTA</span>}
           </div>
 
           <div className="menu-section">
@@ -92,13 +91,18 @@ const fetchConsultations = async () => {
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-                {consultas.map(consulta => (
-                  <div key={consulta._id} className="conversation-item">
-                    {consulta.conversations.length > 0 && consulta.conversations[0].messages.length > 0
-                      ? consulta.conversations[0].messages[0].question
-                      : "Sem perguntas ainda"}
-                  </div>
-                ))}
+                {consultas.length > 0 ? (
+                  consultas.map((consulta) => (
+                    <div key={consulta._id} className="conversation-item">
+                      {/* Exibe a primeira pergunta da primeira conversa */}
+                      {consulta.conversations.length > 0 && consulta.conversations[0].messages.length > 0
+                        ? consulta.conversations[0].messages[0].question
+                        : "Sem perguntas ainda"}
+                    </div>
+                  ))
+                ) : (
+                  <div className="conversation-item">Nenhuma consulta encontrada</div>
+                )}
               </div>
             )}
           </div>
@@ -135,5 +139,3 @@ const fetchConsultations = async () => {
 };
 
 export default MenuSide;
-
-

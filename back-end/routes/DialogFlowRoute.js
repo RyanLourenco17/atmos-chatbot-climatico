@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
-const Conversation = require('../models/Conversation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
 
@@ -19,21 +18,10 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
   try {
     // Encontra ou cria uma nova consulta para o usuário
-    let consultation = await Consultation.findOne({ user: userId }).populate('conversations');
+    let consultation = await Consultation.findOne({ user: userId });
 
     if (!consultation) {
-      consultation = new Consultation({ user: userId, conversations: [] });
-      await consultation.save();
-    }
-
-    // Encontra ou cria uma nova conversa na consulta
-    let conversation = consultation.conversations.length > 0
-      ? consultation.conversations[consultation.conversations.length - 1]
-      : new Conversation({ consultation: consultation._id, messages: [] });
-
-    if (!conversation._id) {
-      await conversation.save();
-      consultation.conversations.push(conversation._id);
+      consultation = new Consultation({ user: userId, messages: [] });
       await consultation.save();
     }
 
@@ -47,9 +35,9 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
         newMessage = new Message({ question: "Teste", answer: testResponse });
         await newMessage.save();
 
-        // Adiciona a mensagem à conversa
-        conversation.messages.push(newMessage._id);
-        await conversation.save();
+        // Adiciona a mensagem à consulta
+        consultation.messages.push(newMessage._id);
+        await consultation.save();
 
         res.json({ "fulfillmentText": testResponse });
         break;
@@ -92,13 +80,13 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
               "Nascer do sol: " + nascerDoSol + "\n" +
               "Pôr do sol: " + porDoSol;
 
-            // Cria a mensagem para a conversa
+            // Cria a mensagem para a consulta
             newMessage = new Message({ question: cidade, answer: resposta });
             await newMessage.save();
 
-            // Adiciona a mensagem à conversa
-            conversation.messages.push(newMessage._id);
-            await conversation.save();
+            // Adiciona a mensagem à consulta
+            consultation.messages.push(newMessage._id);
+            await consultation.save();
 
             res.json({ "fulfillmentText": resposta });
           }
@@ -119,7 +107,7 @@ router.get('/consultas', verifyToken, async (req, res) => {
   const userId = req.userId;
 
   try {
-    const consultations = await Consultation.find({ user: userId }).populate('conversations');
+    const consultations = await Consultation.find({ user: userId }).populate('messages');
 
     if (!consultations || consultations.length === 0) {
       return res.status(404).json({ message: 'Nenhuma consulta encontrada para este usuário.' });
@@ -139,10 +127,7 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
 
   try {
     const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
-      .populate({
-        path: 'conversations',
-        populate: { path: 'messages' }
-      });
+      .populate('messages');
 
     if (!consultation) {
       return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });

@@ -40,9 +40,7 @@ const LoginOrRegister = () => {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+  
     const newErrors = {};
 
     const emailError = validateEmail(loginForm.email);
@@ -53,6 +51,10 @@ const LoginOrRegister = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      // Caso não haja erros o loading é ativado
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       try {
         const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/auth/login', {
           method: 'POST',
@@ -79,16 +81,14 @@ const LoginOrRegister = () => {
         setMessage('Ocorreu um erro ao fazer login. Tente novamente mais tarde.');
         console.error('Erro ao fazer login:', error);
       }
-    }
 
-    setIsLoading(false);
+      setIsLoading(false);
+    }
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+  
     const newErrors = {};
 
     const nameError = validateRequired(registerForm.name, 'Nome');
@@ -101,6 +101,10 @@ const LoginOrRegister = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      // Caso não haja erros o loading é ativado
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       try {
         const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/auth/register', {
           method: 'POST',
@@ -128,9 +132,8 @@ const LoginOrRegister = () => {
         setMessage('Ocorreu um erro ao fazer o cadastro. Tente novamente mais tarde.');
         console.error('Erro ao fazer cadastro:', error);
       }
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
@@ -178,6 +181,8 @@ const LoginOrRegister = () => {
                 </Form.Floating>
 
                 <Button type="submit" className="custom-button">Entrar</Button>
+
+                {message && <div className="alert alert-info">{message}</div>}
               </Form>
             </Tab>
 
@@ -222,10 +227,10 @@ const LoginOrRegister = () => {
                   <Form.Label className='label' htmlFor="formPasswordRegister">Senha</Form.Label>
                   {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                 </Form.Floating>
-                
-                {message && <div className="alert alert-info">{message}</div>}
-
+          
                 <Button type="submit" className="custom-button">Cadastrar</Button>
+
+                {message && <div className="alert alert-info">{message}</div>}
               </Form>
             </Tab>
           </Tabs>
