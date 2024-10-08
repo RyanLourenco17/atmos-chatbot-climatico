@@ -18,7 +18,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
   try {
     // Encontra ou cria uma nova consulta para o usuário
-    let consultation = await Consultation.findOne({ user: userId });
+    let consultation = new Consultation({ user: userId, messages: [] });
 
     if (!consultation) {
       consultation = new Consultation({ user: userId, messages: [] });
@@ -107,7 +107,10 @@ router.get('/consultas', verifyToken, async (req, res) => {
   const userId = req.userId;
 
   try {
-    const consultations = await Consultation.find({ user: userId }).populate('messages');
+    const consultations = await Consultation.find({ user: userId }).populate({
+      path: 'messages',
+      select: 'question answer',
+    });
 
     if (!consultations || consultations.length === 0) {
       return res.status(404).json({ message: 'Nenhuma consulta encontrada para este usuário.' });
@@ -146,7 +149,8 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id; // ID da consulta
 
   try {
-    const consultation = await Consultation.findOneAndDelete({ _id: consultationId, user: userId });
+    const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
+  .populate('messages', 'question answer');
 
     if (!consultation) {
       return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });

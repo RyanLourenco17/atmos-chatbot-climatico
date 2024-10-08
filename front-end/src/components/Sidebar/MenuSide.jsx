@@ -28,31 +28,30 @@ const MenuSide = () => {
   };
 
   // Função para buscar as consultas do usuário
-  const fetchConsultations = async () => {
+  const fetchConsultas = async () => {
     try {
       const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Pega o token do localStorage
-          'Content-Type': 'application/json',
-        },
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Supondo que o token está armazenado no localStorage
+          'Content-Type': 'application/json'
+        }
       });
-      if (!response.ok) {
-        throw new Error('Erro ao buscar consultas.');
-      }
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setConsultas(data); // Atualiza o estado apenas se o dado for um array válido
+
+      if (response.ok) {
+        const data = await response.json();
+        setConsultas(data); // Atualiza o estado com as consultas retornadas
       } else {
-        setConsultas([]);
+        console.error('Erro ao buscar consultas:', response.status);
       }
     } catch (error) {
-      console.error('Erro:', error);
+      console.error('Erro na requisição:', error);
     }
   };
 
+  // useEffect para buscar as consultas ao montar o componente
   useEffect(() => {
-    fetchConsultations(); // Chama a função ao montar o componente
+    fetchConsultas();
   }, []);
 
   return (
@@ -91,10 +90,9 @@ const MenuSide = () => {
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-                {consultas.length > 0 ? (
+                {consultas && consultas.length > 0 ? (
                   consultas.map((consulta) => (
                     <div key={consulta._id} className="conversation-item">
-                      {/* Exibe a primeira pergunta da primeira conversa */}
                       {consulta.conversations.length > 0 && consulta.conversations[0].messages.length > 0
                         ? consulta.conversations[0].messages[0].question
                         : "Sem perguntas ainda"}
@@ -103,6 +101,7 @@ const MenuSide = () => {
                 ) : (
                   <div className="conversation-item">Nenhuma consulta encontrada</div>
                 )}
+
               </div>
             )}
           </div>
