@@ -20,7 +20,7 @@ const fetchConversation = async () => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token não encontrado.');
 
-    const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/conversas/${id}`, {
+    const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consulta/${id}`, {
       headers: {
         "Authorization": `Bearer ${token}`,
       },

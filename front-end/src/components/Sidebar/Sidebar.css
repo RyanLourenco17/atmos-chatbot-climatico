@@ -65,6 +65,10 @@
     font-weight: bold;
 }
 
+.conversation-item p{
+    margin-bottom: 0;
+}
+
 
 .notification-item {
     background-color: #3b3a3a;
@@ -95,6 +99,7 @@
     background-color: var(--white-color);
     color: var(--black-color);
 }
+
 
 .menu-item .icon {
     font-size: 25px;

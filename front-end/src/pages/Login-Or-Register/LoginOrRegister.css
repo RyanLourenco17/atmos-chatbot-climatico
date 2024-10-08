@@ -89,6 +89,7 @@
 }
 
 .alert {
+  margin-top: 1rem;
   background-color: rgb(255, 70, 70, 0.4);
   color: var(--white-color);
   border: none;

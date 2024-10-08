@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';  
 import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
 import atmosLogo from '../../assets/Atmos.png';
@@ -10,6 +11,8 @@ const MenuSide = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false); 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [consultas, setConsultas] = useState([]); // Estado para armazenar consultas
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate(); // Hook para navegação
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -33,7 +36,7 @@ const MenuSide = () => {
       const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Supondo que o token está armazenado no localStorage
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -46,6 +49,8 @@ const MenuSide = () => {
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
+    } finally {
+      setIsLoading(false); 
     }
   };
 
@@ -53,6 +58,11 @@ const MenuSide = () => {
   useEffect(() => {
     fetchConsultas();
   }, []);
+
+  // Função para navegar até a página da conversa
+  const handleNavigateToConversation = (id) => {
+    navigate(`/conversa/${id}`);
+  };
 
   return (
     <div>
@@ -90,18 +100,27 @@ const MenuSide = () => {
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-                {consultas && consultas.length > 0 ? (
-                  consultas.map((consulta) => (
-                    <div key={consulta._id} className="conversation-item">
-                      {consulta.conversations.length > 0 && consulta.conversations[0].messages.length > 0
-                        ? consulta.conversations[0].messages[0].question
-                        : "Sem perguntas ainda"}
-                    </div>
-                  ))
+                {isLoading ? (
+                  <div className="conversation-item">
+                    <p>Carregando consultas...</p>
+                  </div>
                 ) : (
-                  <div className="conversation-item">Nenhuma consulta encontrada</div>
+                  consultas && consultas.length > 0 ? (
+                    consultas.map((consulta, index) => (
+                      <div 
+                        className='conversation-item' 
+                        key={index}
+                        onClick={() => handleNavigateToConversation(consulta.id)} // Navegar ao clicar
+                      >
+                        <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="conversation-item">
+                      <p>Nenhuma consulta disponível</p>
+                    </div>
+                  )
                 )}
-
               </div>
             )}
           </div>

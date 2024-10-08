@@ -40,21 +40,20 @@ const LoginOrRegister = () => {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-  
+    
     const newErrors = {};
-
+  
     const emailError = validateEmail(loginForm.email);
     const passwordError = validateRequired(loginForm.password, 'Senha');
     if (emailError) newErrors.email = emailError;
     if (passwordError) newErrors.password = passwordError;
-
+  
     setErrors(newErrors);
-
+  
+    
     if (Object.keys(newErrors).length === 0) {
-      // Caso não haja erros o loading é ativado
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+  
       try {
         const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/auth/login', {
           method: 'POST',
@@ -66,9 +65,9 @@ const LoginOrRegister = () => {
             password: loginForm.password,
           }),
         });
-
+  
         const data = await response.json();
-
+  
         if (response.ok) {
           setMessage(data.message);
           localStorage.setItem('token', data.token);
@@ -81,29 +80,28 @@ const LoginOrRegister = () => {
         setMessage('Ocorreu um erro ao fazer login. Tente novamente mais tarde.');
         console.error('Erro ao fazer login:', error);
       }
-
+  
       setIsLoading(false);
     }
   };
-
+  
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-  
+    
     const newErrors = {};
-
+  
     const nameError = validateRequired(registerForm.name, 'Nome');
     const emailError = validateEmail(registerForm.email);
     const passwordError = validateRequired(registerForm.password, 'Senha');
     if (nameError) newErrors.name = nameError;
     if (emailError) newErrors.email = emailError;
     if (passwordError) newErrors.password = passwordError;
-
+  
     setErrors(newErrors);
-
+  
+    
     if (Object.keys(newErrors).length === 0) {
-      // Caso não haja erros o loading é ativado
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsLoading(true); 
       
       try {
         const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/auth/register', {
@@ -117,9 +115,9 @@ const LoginOrRegister = () => {
             password: registerForm.password,
           }),
         });
-
+  
         const data = await response.json();
-
+  
         if (response.ok) {
           setMessage(data.message);
           localStorage.setItem('token', data.token);
@@ -132,9 +130,11 @@ const LoginOrRegister = () => {
         setMessage('Ocorreu um erro ao fazer o cadastro. Tente novamente mais tarde.');
         console.error('Erro ao fazer cadastro:', error);
       }
+  
       setIsLoading(false);
     }
   };
+  
 
   return (
     <>
