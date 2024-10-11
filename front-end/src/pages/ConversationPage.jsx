@@ -14,34 +14,32 @@ const ConversationPage = () => {
   // Busca a conversa existente ao carregar a página
   useEffect(() => {
     // Verifica e ajusta o token
-const fetchConversation = async () => {
-  setLoading(true);
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token não encontrado.');
+    const fetchConversation = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token não encontrado.');
 
-    const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consulta/${id}`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+        const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consulta/${id}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
 
-    if (!response.ok) {
-      throw new Error('Erro ao buscar a conversa');
-    }
+        if (!response.ok) {
+          throw new Error('Erro ao buscar a conversa');
+        }
 
-    const data = await response.json();
-    if (!Array.isArray(data.messages)) throw new Error('Formato de dados inválido');
-    setConversations(data.messages); // Certifica-se que "messages" é um array
-  } catch (error) {
-    console.error('Erro ao buscar a conversa:', error);
-    navigate('/nova-conversa'); // Redireciona em caso de erro
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+        const data = await response.json();
+        if (!Array.isArray(data.messages)) throw new Error('Formato de dados inválido');
+        setConversations(data.messages);
+      } catch (error) {
+        console.error('Erro ao buscar a conversa:', error);
+        navigate('/nova-conversa'); // Redireciona em caso de erro
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchConversation();
   }, [id, navigate]);
 

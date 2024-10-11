@@ -28,20 +28,6 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
     let newMessage;
 
     switch (intentName) {
-      case "Teste":
-        const testResponse = "Este teste funciona";
-
-        // Cria uma nova mensagem e salva no banco de dados
-        newMessage = new Message({ question: "Teste", answer: testResponse });
-        await newMessage.save();
-
-        // Adiciona a mensagem à consulta
-        consultation.messages.push(newMessage._id);
-        await consultation.save();
-
-        res.json({ "fulfillmentText": testResponse });
-        break;
-
       case "Temperatura":
         if (!cidade) {
           res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });

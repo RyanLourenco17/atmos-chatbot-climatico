@@ -18,10 +18,6 @@ const UserSchema = new mongoose.Schema({
     enum: ['Padrão', 'Acessível'],
     default: 'Padrão'
   },
-  consultations: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Consultation',
-  }],
   createdAt: {
     type: Date,
     default: Date.now
