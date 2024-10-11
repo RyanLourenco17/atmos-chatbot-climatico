@@ -18,7 +18,7 @@ const TextareaQuestion = ({ onNewMessage }) => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Token não encontrado.');
   
-      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/Dialogflow`, {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",

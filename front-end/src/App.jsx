@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // Pages
 import NewConversation from './pages/NewConversation';
 import LoginOrRegister from './pages/Login-Or-Register/LoginOrRegister';
-import ConversationPage from './pages/ConversationPage';
+import ConsultationPage from './pages/ConsultationPage';
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
       <Routes>
         <Route path='/nova-conversa' element={<NewConversation />} />
         <Route path='/' element={<LoginOrRegister />} />
-        <Route path='/conversa/:id' element={<ConversationPage />} />
+        <Route path='/consulta/:id' element={<ConsultationPage />} />
       </Routes>
     </BrowserRouter>
   );

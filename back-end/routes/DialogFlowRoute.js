@@ -115,6 +115,7 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id; // ID da consulta
 
   try {
+    // Encontra a consulta pelo ID e verifica se pertence ao usuário
     const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
       .populate('messages');
 
@@ -128,6 +129,7 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar consulta.' });
   }
 });
+
 
 // Rota para deletar uma consulta específica
 router.delete('/consultas/:id', verifyToken, async (req, res) => {

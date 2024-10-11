@@ -12,7 +12,7 @@ const MenuSide = () => {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [consultas, setConsultas] = useState([]); // Estado para armazenar consultas
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -60,8 +60,8 @@ const MenuSide = () => {
   }, []);
 
   // Função para navegar até a página da conversa
-  const handleNavigateToConversation = (id) => {
-    navigate(`/conversa/${id}`);
+  const handleNavigateToConversation = (consultationId) => {
+    navigate(`/consulta/${consultationId}`);
   };
 
   return (
@@ -110,7 +110,7 @@ const MenuSide = () => {
                       <div 
                         className='conversation-item' 
                         key={index}
-                        onClick={() => handleNavigateToConversation(consulta.id)} // Navegar ao clicar
+                        onClick={() => handleNavigateToConversation(consulta.id)} 
                       >
                         <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
                       </div>
