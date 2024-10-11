@@ -11,9 +11,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/nova-conversa' element={<NewConversation />} />
+        <Route path='/nova-consulta' element={<NewConversation />} />
         <Route path='/' element={<LoginOrRegister />} />
-        <Route path='/consulta/:id' element={<ConsultationPage />} />
+        <Route path='/consulta/:consultationId' element={<ConsultationPage />} />
       </Routes>
     </BrowserRouter>
   );

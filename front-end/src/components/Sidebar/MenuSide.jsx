@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';  
 import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import { useNavigate, Link } from 'react-router-dom'; // Importar useNavigate
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
 import atmosLogo from '../../assets/Atmos.png';
@@ -10,7 +10,7 @@ const MenuSide = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false); 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [consultas, setConsultas] = useState([]); // Estado para armazenar consultas
+  const [consultas, setConsultas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -61,6 +61,7 @@ const MenuSide = () => {
 
   // Função para navegar até a página da conversa
   const handleNavigateToConversation = (consultationId) => {
+    console.log('ID da consulta:', consultationId);
     navigate(`/consulta/${consultationId}`);
   };
 
@@ -89,8 +90,10 @@ const MenuSide = () => {
 
         <div className="menu">
           <div className="menu-item">
-            <PencilSquare className="icon" />
-            {!isCollapsed && <span>NOVA CONSULTA</span>}
+            <Link className='new-consultation' to="/nova-consulta">
+              <PencilSquare className="icon" />
+              {!isCollapsed && <span>NOVA CONSULTA</span>}
+            </Link>
           </div>
 
           <div className="menu-section">
@@ -110,7 +113,7 @@ const MenuSide = () => {
                       <div 
                         className='conversation-item' 
                         key={index}
-                        onClick={() => handleNavigateToConversation(consulta.id)} 
+                        onClick={() => handleNavigateToConversation(consulta._id)} 
                       >
                         <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
                       </div>

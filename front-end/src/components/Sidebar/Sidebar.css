@@ -95,7 +95,15 @@
     cursor: pointer;
 }
 
-.menu-item:hover{
+.menu-item .new-consultation{
+    text-decoration: none;
+    color: var(--white-color);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.menu-item:hover, .menu-item .new-consultation:hover{
     background-color: var(--white-color);
     color: var(--black-color);
 }

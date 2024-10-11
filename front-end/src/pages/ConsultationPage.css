@@ -1,75 +1,66 @@
-/* .page-container{
-    display: flex;
-    justify-content: space-between;
-}
 
 .content-container {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
     margin: 5rem 10rem;
 }
 
-.conversation-area {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.conversation-display {
-    flex-grow: 1;
+.consultation-display {
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    border: 1px solid var(--white-color);
-    border-radius: 5px;
-    max-height: 400px;
+    border-radius: 1rem;
+    box-shadow: 0 0 15px var(--black-color);
+    max-height: 500px;
+    max-width: 750px;
     overflow-y: auto;
 }
 
-.question {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
 
 .question-text {
-    background-color: #d1f0ff;
+    /* background-color: var(--black-color); */
+    box-shadow: 0 0 15px var(--white-color);
     padding: .5rem;
     border-radius: .8rem;
-    color: var(--black-color);
-    max-width: 50%;
+    color: var(--white-color);
+    max-width: 70%;
+    float: right;
 }
 
-.answer {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 1rem;
-}
 
 .answer-wrapper {
+    margin-top: 5rem;
+    margin-bottom: 5rem;
     display: flex;
-    align-items: center;
+    align-items: start;
     gap: .5rem;
-    max-width: 50%;
+    max-width: 70%;
 }
 
 .answer-text {
-    background-color: #e0ffe1;
+    background-color: var(--white-color);
+    box-shadow: 0 0 15px var(--black-color);
     padding: .5rem;
     border-radius: .8rem;
     color: var(--black-color);
 }
 
-.answer img {
+.answer-wrapper img {
     height: 50px;
-    border-radius: 50%;
 }
 
-.loading {
-    text-align: center;
-    color: var(--white-color);
+.scrollable-section::-webkit-scrollbar {
+    width: 6px;
+    background-color: var(--black-color);
 }
+
+.scrollable-section::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+}
+
 
 @media (max-width: 768px) {
     .page-container {
@@ -80,37 +71,15 @@
         margin: 0;
     }
 
-    .conversation-display {
+    .consultation-display {
         max-height: 300px;
-        margin-top: 5rem;
+        margin-top: 6rem;
+    }
+
+    .interactive-area{
+        width: 100%;
     }
 }
 
-   */
-
-   .consultation-page {
-    padding: 20px;
-  }
   
-  .consultation-page h2 {
-    margin-bottom: 20px;
-  }
-  
-  .consultation-page ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .consultation-page li {
-    padding: 10px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-  }
-  
-  .consultation-page li:hover {
-    background-color: #f0f0f0;
-  }
   
