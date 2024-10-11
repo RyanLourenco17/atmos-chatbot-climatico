@@ -1,0 +1,167 @@
+.card {
+    font-family: 'Oxygen';
+    width: 240px; /* Largura do card */
+    background: linear-gradient(135deg, #3b3a3a 50%, #574d5c 80%, transparent 100%, #FF8AFB 100%);
+    color: #fff;
+    padding: 16px; 
+    padding: 16px; 
+    text-align: center;
+    border-radius: 20px;
+    height: 235px;
+    padding-top: 0px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 10;
+    transition: all 0.3s ease; /* Adicionando uma transição suave */
+    transition: all 0.3s ease; 
+}
+
+.card.collapsed {
+    width: 55px; 
+    height: 55px; 
+    padding: 10px; 
+    overflow: hidden; 
+    transition: all 0.3s ease;
+}
+
+.toggle-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+}
+
+.toggle-icon {
+    font-size: 24px;
+    color: #fff;
+}
+
+.mobile-header {
+    display: none; /*esconder o header mobile */
+    display: none; 
+}
+
+/* Estilo para o card no modo mobile */
+@media (max-width: 768px) {
+    .card {
+        top: 5px;
+        right: 5px;
+    }
+
+    .mobile-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: #574d5c;
+    }
+
+    .toggle-icon-mobile {
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .mobile-open .card {
+        top: 10px;
+        right: 10px;
+    }
+}
+
+
+.weather {
+    display: block;
+}
+
+.card.collapsed .weather {
+    display: none; /* Esconder o conteúdo de clima no modo colapsado */
+}
+
+/* Ajustes gerais para os detalhes de temperatura e ícones */
+.weather {
+    margin-top: 10px;
+}
+
+.weather-icon {
+    width: 60px;
+    margin-top: 15px;
+}
+
+.weather img {
+    width: 100px;
+    margin-top: -10px;
+}
+
+.weather h1 {
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.weather h2 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: -8px;
+}
+
+.details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px;
+    margin-top: 10px;
+}
+
+.col {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    font-size: 16px;
+    font-weight: 490;
+    margin-top: -4px;
+    margin-left: 1px;
+}
+
+.col img {
+    width: 20px;
+    margin-right: 5px;
+    margin-top: -11px;
+    margin-left: -3px;
+}
+
+
+.humidity{
+    font-size: 15px;
+    margin-top: 5px;
+    font-weight: 500;
+    margin-left: 0px;
+}
+.wind {
+    font-size: 15px;
+    margin-top: 5px;
+    font-weight: 500;
+    margin-left: 0px;
+}
+
+.humidade {
+    font-size: 14px;
+    margin-top: -20px;
+    height: 5px;
+    font-weight: 500;
+}
+
+.velocidade {
+    font-size: 14px;
+    margin-top: -20px;
+    height: 5px;
+    font-weight: 500;
+    margin-left: 0px;
+}
+
+
+.error{
+    font-size: 14px;
+    margin-top: 100px;
+    font-weight: 400;
+    color: white;
+    font-family: 'Rubik Mono One';
+}
