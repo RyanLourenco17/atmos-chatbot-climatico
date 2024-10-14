@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import './ConsultationPage.css'; // Estilos para a página
+import './ConsultationPage.css';
 import MenuSide from '../components/Sidebar/MenuSide';
 import TextareaQuestion from '../components/TextareaQuestion/TextareaQuestion';
 
 import mascoteImg from '../assets/Mascote.png';
 
 const ConsultationPage = () => {
-  const { consultationId } = useParams(); 
-  const [messages, setMessages] = useState([]); // Estado para armazenar mensagens
+  const { consultationId } = useParams();
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Função para buscar as mensagens da consulta específica
@@ -18,8 +18,8 @@ const ConsultationPage = () => {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -27,22 +27,26 @@ const ConsultationPage = () => {
       }
 
       const data = await response.json();
-      setMessages(data.messages); // Armazena mensagens no estado
-      setIsLoading(false); // Atualiza o estado de loading
+      setMessages(data.messages);
+      setIsLoading(false);
     } catch (error) {
       console.error('Erro ao buscar mensagens:', error);
-      setIsLoading(false); // Atualiza o estado de loading
+      setIsLoading(false);
     }
   };
 
+  // useEffect para buscar mensagens ao carregar a página
   useEffect(() => {
-    console.log('ID da consulta:', consultationId); // Log do ID
     if (consultationId) {
       fetchMessages(consultationId);
-    } else {
-      console.error('ID da consulta não está definido');
     }
   }, [consultationId]);
+
+  // Função para adicionar uma nova pergunta localmente
+  const handleNewQuestion = (newQuestion) => {
+    const newMessage = { question: newQuestion, answer: 'Buscando resposta...' };
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
 
   if (isLoading) {
     return <div>Carregando...</div>;
@@ -55,7 +59,7 @@ const ConsultationPage = () => {
         <div className="consultation-area">
           <div className="consultation-display">
             {messages.map((message, index) => (
-              <div className='messages' key={index}>
+              <div className="messages" key={index}>
                 <p className="question-text"><strong>Pergunta:</strong> {message.question}</p>
                 <div className="answer-wrapper">
                   <img src={mascoteImg} alt="Mascote" />
@@ -66,10 +70,10 @@ const ConsultationPage = () => {
           </div>
         </div>
         <div className="interactive-area">
-          <TextareaQuestion />
+          <TextareaQuestion onNewQuestion={handleNewQuestion} />
         </div>
       </div>
-    </div> 
+    </div>
   );
 };
 

@@ -26,3 +26,7 @@
     border-color: var(--error-color);
     color: var(--black-color);
 }
+
+.btn-close {
+    background-color: var(--white-color);
+}

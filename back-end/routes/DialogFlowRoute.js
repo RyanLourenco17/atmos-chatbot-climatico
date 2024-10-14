@@ -17,8 +17,8 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   const cidade = req.body.queryResult.parameters['Cidade'];
 
   try {
-    // Encontra ou cria uma nova consulta para o usuário
-    let consultation = new Consultation({ user: userId, messages: [] });
+    // Encontra uma consulta existente do usuário, se não existir, cria uma nova
+    let consultation = await Consultation.findOne({ user: userId });
 
     if (!consultation) {
       consultation = new Consultation({ user: userId, messages: [] });
@@ -70,7 +70,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
             newMessage = new Message({ question: cidade, answer: resposta });
             await newMessage.save();
 
-            // Adiciona a mensagem à consulta
+            // Adiciona a mensagem à consulta existente
             consultation.messages.push(newMessage._id);
             await consultation.save();
 
@@ -87,6 +87,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Houve um erro ao processar sua solicitação." });
   }
 });
+
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {

@@ -63,6 +63,7 @@
     font-size: 12px;
     font-family: 'Oxygen';
     font-weight: bold;
+    cursor: pointer;
 }
 
 .conversation-item p{

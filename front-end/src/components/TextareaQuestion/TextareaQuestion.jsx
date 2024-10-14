@@ -1,48 +1,57 @@
-import { useState } from 'react'; 
+import { useState } from 'react';
 import { MicFill, Send } from 'react-bootstrap-icons';
 import './Textarea.css';
 
-const TextareaQuestion = ({ onNewMessage }) => {
+const TextareaQuestion = ({ onNewQuestion, onSubmit }) => {
   const [question, setQuestion] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (e) => {
+    setQuestion(e.target.value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!question.trim()) return; // Garante que a pergunta não está vazia
-  
-    onNewMessage({ type: 'question', text: question }); // Adiciona localmente
-  
-    setLoading(true);
-  
+
+    if (question.trim() === '') {
+      alert('Por favor, insira uma pergunta.');
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Token não encontrado.');
-  
-      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta`, {
+      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta', {
         method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: question }),
+        body: JSON.stringify({
+          queryResult: {
+            intent: { displayName: 'Temperatura' },  // Ajuste se necessário
+            parameters: { 'Cidade': question }
+          }
+        }),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Erro ao enviar a mensagem');
+        throw new Error('Erro ao fazer a consulta');
       }
-  
+
       const data = await response.json();
-  
-      if (data.fulfillmentText) {
-        onNewMessage({ type: 'answer', text: data.fulfillmentText }); // Adiciona a resposta do backend
-      } else {
-        throw new Error('Resposta inválida do servidor');
+      console.log('Resposta do servidor:', data);
+
+      // Adiciona a nova pergunta à interface
+      onNewQuestion(question);
+
+      // Limpa o campo de pergunta
+      setQuestion('');
+
+      // Navega para a página da consulta após o sucesso da requisição
+      if (onSubmit) {
+        onSubmit(data); // Passa os dados da consulta
       }
+
     } catch (error) {
       console.error('Erro ao enviar a pergunta:', error);
-    } finally {
-      setLoading(false);
-      setQuestion(''); // Limpa o campo de input
     }
   };
 
@@ -53,11 +62,11 @@ const TextareaQuestion = ({ onNewMessage }) => {
           type="text" 
           placeholder="Faça aqui sua consulta do clima" 
           value={question} 
-          onChange={(e) => setQuestion(e.target.value)} 
+          onChange={handleInputChange} 
         />
         <MicFill className="icon" />
       </div>
-      <button className="btn-send" disabled={loading}>
+      <button className="btn-send" type="submit">
         <Send className="icon" />
       </button>
     </form>
@@ -65,6 +74,3 @@ const TextareaQuestion = ({ onNewMessage }) => {
 };
 
 export default TextareaQuestion;
-
-
-
