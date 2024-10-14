@@ -111,8 +111,21 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
           console.log(err);
           return res.json({ "fulfillmentText": "Erro ao buscar clima." });
         } else {
+
           // Dados de clima e mensagem gerada
-          const resposta = `Dados sobre clima para ${cidade}...`;  // Substitua com os dados reais
+          const resposta = "Cidade: " + currentWeather.name + "\n" +
+            "Data e Hora: " + dataHora + "\n" +
+            "Temperatura Atual: " + temperaturaAtual + "º" + "\n" +
+            "Temperatura Máxima: " + tempMax + "º" + "\n" +
+            "Temperatura Mínima: " + tempMin + "º" + "\n" +
+            "Umidade: " + umidade + "%" + "\n" +
+            "Velocidade do vento: " + velocidadeVento + "km/h" + "\n" +
+            "Pressão Atmosférica: " + pressao + " hPa" + "\n" +
+            "Descrição do clima: " + descricaoClima + "\n" +
+            "Visibilidade: " + visibilidade + " metros" + "\n" +
+            "Nascer do sol: " + nascerDoSol + "\n" +
+            "Pôr do sol: " + porDoSol;
+
           newMessage = new Message({ question: cidade, answer: resposta });
           await newMessage.save();
 
