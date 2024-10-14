@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MicFill, Send } from 'react-bootstrap-icons';
 import './Textarea.css';
 
-const TextareaQuestion = ({ onNewQuestion, onSubmit }) => {
+const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultationId }) => {
   const [question, setQuestion] = useState('');
 
   const handleInputChange = (e) => {
@@ -18,22 +18,35 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit }) => {
     }
 
     try {
-      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta', {
+      let url = 'https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta';
+      let bodyContent = {
+        queryResult: {
+          intent: { displayName: 'Temperatura' },  // Ajuste se necessário
+          parameters: { 'Cidade': question }
+        }
+      };
+
+      if (isMessageMode && consultationId) {
+        url = `https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/adicionar-mensagem/${consultationId}`;
+        bodyContent = {
+          queryResult: {
+            intent: { displayName: 'Temperatura' },  // Ajuste se necessário
+            parameters: { 'Cidade': question }
+          }
+        };
+      }
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          queryResult: {
-            intent: { displayName: 'Temperatura' },  // Ajuste se necessário
-            parameters: { 'Cidade': question }
-          }
-        }),
+        body: JSON.stringify(bodyContent),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao fazer a consulta');
+        throw new Error('Erro ao enviar consulta ou mensagem');
       }
 
       const data = await response.json();
@@ -45,13 +58,13 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit }) => {
       // Limpa o campo de pergunta
       setQuestion('');
 
-      // Navega para a página da consulta após o sucesso da requisição
+      // Navega para a página da consulta após o sucesso da requisição, se necessário
       if (onSubmit) {
         onSubmit(data); // Passa os dados da consulta
       }
 
     } catch (error) {
-      console.error('Erro ao enviar a pergunta:', error);
+      console.error('Erro ao enviar pergunta:', error);
     }
   };
 

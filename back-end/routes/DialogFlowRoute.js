@@ -10,83 +10,128 @@ const helper = new OpenWeatherMapHelper({
   units: "metric",
 });
 
-// Rota para o Dialogflow
+// Rota para criar uma nova consulta
 router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
   const cidade = req.body.queryResult.parameters['Cidade'];
 
   try {
-    // Encontra uma consulta existente do usuário, se não existir, cria uma nova
-    let consultation = await Consultation.findOne({ user: userId });
+    // Cria uma nova consulta sem mensagens
+    const newConsultation = new Consultation({
+      user: userId,
+      messages: []
+    });
+
+    await newConsultation.save(); // Salva a consulta no banco de dados
+
+    let newMessage;
+
+    if (intentName === "Temperatura") {
+      if (!cidade) {
+        return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });
+      }
+
+      // Chama a API do OpenWeather
+      helper.getCurrentWeatherByCityName(cidade, async (err, currentWeather) => {
+        if (err) {
+          console.log(err);
+          return res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
+        } else {
+          const temperaturaAtual = parseInt(currentWeather.main.temp);
+          const tempMax = parseInt(currentWeather.main.temp_max);
+          const tempMin = parseInt(currentWeather.main.temp_min);
+          const umidade = parseInt(currentWeather.main.humidity);
+          const velocidadeVento = parseInt(currentWeather.wind.speed);
+          const pressao = currentWeather.main.pressure;
+          const descricaoClima = currentWeather.weather[0].description;
+          const visibilidade = currentWeather.visibility;
+          const nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
+          const porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
+          const dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
+
+          const resposta =
+            "Cidade: " + currentWeather.name + "\n" +
+            "Data e Hora: " + dataHora + "\n" +
+            "Temperatura Atual: " + temperaturaAtual + "º" + "\n" +
+            "Temperatura Máxima: " + tempMax + "º" + "\n" +
+            "Temperatura Mínima: " + tempMin + "º" + "\n" +
+            "Umidade: " + umidade + "%" + "\n" +
+            "Velocidade do vento: " + velocidadeVento + "km/h" + "\n" +
+            "Pressão Atmosférica: " + pressao + " hPa" + "\n" +
+            "Descrição do clima: " + descricaoClima + "\n" +
+            "Visibilidade: " + visibilidade + " metros" + "\n" +
+            "Nascer do sol: " + nascerDoSol + "\n" +
+            "Pôr do sol: " + porDoSol;
+
+          // Cria a mensagem para a consulta
+          newMessage = new Message({ question: cidade, answer: resposta });
+          await newMessage.save();
+
+          // Adiciona a mensagem à nova consulta
+          newConsultation.messages.push(newMessage._id);
+          await newConsultation.save();
+
+          res.json({ "fulfillmentText": resposta, consultationId: newConsultation._id });
+        }
+      });
+    } else {
+      res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
+    }
+  } catch (error) {
+    console.error('Erro ao criar nova consulta:', error);
+    res.status(500).json({ "fulfillmentText": "Houve um erro ao criar a consulta." });
+  }
+});
+
+// Rota para adicionar uma nova mensagem em uma consulta existente
+router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
+  const userId = req.userId;
+  const { id } = req.params;
+  const intentName = req.body.queryResult.intent.displayName;
+  const cidade = req.body.queryResult.parameters['Cidade'];
+
+  try {
+    const consultation = await Consultation.findOne({ _id: id, user: userId });
 
     if (!consultation) {
-      consultation = new Consultation({ user: userId, messages: [] });
-      await consultation.save();
+      return res.status(404).json({ "fulfillmentText": "Consulta não encontrada ou não pertence ao usuário." });
     }
 
     let newMessage;
 
-    switch (intentName) {
-      case "Temperatura":
-        if (!cidade) {
-          res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });
-          return;
+    if (intentName === "Temperatura") {
+      if (!cidade) {
+        return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });
+      }
+
+      // API do OpenWeather
+      helper.getCurrentWeatherByCityName(cidade, async (err, currentWeather) => {
+        if (err) {
+          console.log(err);
+          return res.json({ "fulfillmentText": "Erro ao buscar clima." });
+        } else {
+          // Dados de clima e mensagem gerada
+          const resposta = `Dados sobre clima para ${cidade}...`;  // Substitua com os dados reais
+          newMessage = new Message({ question: cidade, answer: resposta });
+          await newMessage.save();
+
+          consultation.messages.push(newMessage._id);
+          await consultation.save();
+
+          res.json({ "fulfillmentText": resposta });
         }
-
-        // Chama a API do OpenWeather
-        helper.getCurrentWeatherByCityName(cidade, async (err, currentWeather) => {
-          if (err) {
-            console.log(err);
-            res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados do clima." });
-          } else {
-            const temperaturaAtual = parseInt(currentWeather.main.temp);
-            const tempMax = parseInt(currentWeather.main.temp_max);
-            const tempMin = parseInt(currentWeather.main.temp_min);
-            const umidade = parseInt(currentWeather.main.humidity);
-            const velocidadeVento = parseInt(currentWeather.wind.speed);
-            const pressao = currentWeather.main.pressure;
-            const descricaoClima = currentWeather.weather[0].description;
-            const visibilidade = currentWeather.visibility;
-            const nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
-            const porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
-            const dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
-
-            const resposta =
-              "Cidade: " + currentWeather.name + "\n" +
-              "Data e Hora: " + dataHora + "\n" +
-              "Temperatura Atual: " + temperaturaAtual + "º" + "\n" +
-              "Temperatura Máxima: " + tempMax + "º" + "\n" +
-              "Temperatura Mínima: " + tempMin + "º" + "\n" +
-              "Umidade: " + umidade + "%" + "\n" +
-              "Velocidade do vento: " + velocidadeVento + "km/h" + "\n" +
-              "Pressão Atmosférica: " + pressao + " hPa" + "\n" +
-              "Descrição do clima: " + descricaoClima + "\n" +
-              "Visibilidade: " + visibilidade + " metros" + "\n" +
-              "Nascer do sol: " + nascerDoSol + "\n" +
-              "Pôr do sol: " + porDoSol;
-
-            // Cria a mensagem para a consulta
-            newMessage = new Message({ question: cidade, answer: resposta });
-            await newMessage.save();
-
-            // Adiciona a mensagem à consulta existente
-            consultation.messages.push(newMessage._id);
-            await consultation.save();
-
-            res.json({ "fulfillmentText": resposta });
-          }
-        });
-        break;
-
-      default:
-        res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
+      });
+    } else {
+      res.json({ "fulfillmentText": "Não entendi sua solicitação." });
     }
   } catch (error) {
-    console.error('Erro ao processar a solicitação:', error);
-    res.status(500).json({ "fulfillmentText": "Houve um erro ao processar sua solicitação." });
+    console.error('Erro ao adicionar mensagem:', error);
+    res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
+
+
 
 
 // Rota para pegar todas as consultas climáticas do usuário

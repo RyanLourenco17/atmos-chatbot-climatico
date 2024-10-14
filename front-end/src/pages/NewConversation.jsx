@@ -9,8 +9,7 @@ const NewConversation = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (consultaData) => {
-    // Navega para a página da consulta após o envio
-    navigate(`/consulta/consultationId`); // Use o ID da consulta retornada do servidor, se necessário
+    navigate(`/consulta/${consultaData.consultationId}`);
   };
 
   return (
@@ -20,7 +19,7 @@ const NewConversation = () => {
         <div className="interactive-area">
           <Loading />
           <CardSugestion />
-          <TextareaQuestion onSubmit={handleSubmit} />
+          <TextareaQuestion onSubmit={handleSubmit} isMessageMode={false} />
         </div>
       </div>
     </div>
