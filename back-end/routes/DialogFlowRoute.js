@@ -112,6 +112,18 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
           return res.json({ "fulfillmentText": "Erro ao buscar clima." });
         } else {
 
+          const temperaturaAtual = currentWeather.main.temp;
+          const tempMax = currentWeather.main.temp_max;
+          const tempMin = currentWeather.main.temp_min;
+          const umidade = currentWeather.main.humidity;
+          const velocidadeVento = currentWeather.wind.speed;
+          const pressao = currentWeather.main.pressure;
+          const descricaoClima = currentWeather.weather[0].description;
+          const visibilidade = currentWeather.visibility;
+          const nascerDoSol = new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString();
+          const porDoSol = new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString();
+          const dataHora = new Date(currentWeather.dt * 1000).toLocaleString();
+
           // Dados de clima e mensagem gerada
           const resposta = "Cidade: " + currentWeather.name + "\n" +
             "Data e Hora: " + dataHora + "\n" +
@@ -143,7 +155,6 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
-
 
 
 

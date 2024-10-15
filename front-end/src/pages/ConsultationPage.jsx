@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import './ConsultationPage.css';
 import MenuSide from '../components/Sidebar/MenuSide';
 import TextareaQuestion from '../components/TextareaQuestion/TextareaQuestion';
+import Loading from '../components/LoadingWave/Loading';
 
 import mascoteImg from '../assets/Mascote.png';
+import './ConsultationPage.css';
 
 const ConsultationPage = () => {
   const { consultationId } = useParams();
@@ -45,25 +46,25 @@ const ConsultationPage = () => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
 
-  if (isLoading) {
-    return <div>Carregando...</div>;
-  }
-
   return (
     <div className="page-container">
       <MenuSide />
       <div className="content-container">
         <div className="consultation-area">
           <div className="consultation-display">
-            {messages.map((message, index) => (
-              <div className="messages" key={index}>
-                <p className="question-text"><strong>Pergunta:</strong> {message.question}</p>
-                <div className="answer-wrapper">
-                  <img src={mascoteImg} alt="Mascote" />
-                  <p className="answer-text"><strong>Resposta:</strong> {message.answer}</p>
+            {isLoading ? (
+              <Loading />
+            ) : (
+              messages.map((message, index) => (
+                <div className="messages" key={index}>
+                  <p className="question-text"><strong>Pergunta:</strong> {message.question}</p>
+                  <div className="answer-wrapper">
+                    <img src={mascoteImg} alt="Mascote" />
+                    <p className="answer-text"><strong>Resposta:</strong> {message.answer}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
         <div className="interactive-area">

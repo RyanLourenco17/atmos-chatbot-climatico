@@ -21,7 +21,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
       let url = 'https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta';
       let bodyContent = {
         queryResult: {
-          intent: { displayName: 'Temperatura' },  // Ajuste se necessário
+          intent: { displayName: 'Temperatura' },
           parameters: { 'Cidade': question }
         }
       };
@@ -30,7 +30,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
         url = `https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/adicionar-mensagem/${consultationId}`;
         bodyContent = {
           queryResult: {
-            intent: { displayName: 'Temperatura' },  // Ajuste se necessário
+            intent: { displayName: 'Temperatura' },
             parameters: { 'Cidade': question }
           }
         };
@@ -60,7 +60,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
 
       // Navega para a página da consulta após o sucesso da requisição, se necessário
       if (onSubmit) {
-        onSubmit(data); // Passa os dados da consulta
+        onSubmit(data);
       }
 
     } catch (error) {

@@ -12,6 +12,13 @@ const NewConversation = () => {
     navigate(`/consulta/${consultaData.consultationId}`);
   };
 
+  const handleNewQuestion = (newQuestion) => {
+    const newMessage = {
+      question: newQuestion,
+      answer: 'Buscando resposta...'
+    };
+  };
+
   return (
     <div className="page-container">
       <MenuSide />
@@ -19,7 +26,7 @@ const NewConversation = () => {
         <div className="interactive-area">
           <Loading />
           <CardSugestion />
-          <TextareaQuestion onSubmit={handleSubmit} isMessageMode={false} />
+          <TextareaQuestion onSubmit={handleSubmit} isMessageMode={false} onNewQuestion={handleNewQuestion} />
         </div>
       </div>
     </div>
