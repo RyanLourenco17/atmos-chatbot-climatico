@@ -9,14 +9,12 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  /* background-color: rebeccapurple; */
   margin: 1rem 10rem;
 }
   
 .interactive-area {
   position: fixed;
   bottom: 10px;
-  /* padding: 10px; */
   display: flex;
   flex-direction: column;
   align-items: center;

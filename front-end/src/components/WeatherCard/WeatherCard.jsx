@@ -6,16 +6,13 @@ import humidity from '../../assets/humidity.png';
 import mist from '../../assets/mist.png';
 import rain from '../../assets/rain.png';
 import wind from '../../assets/wind.png';
-import { BsList } from 'react-icons/bs';
 
-// import './WeatherCus.css';
+import './WeatherCus.css';
 
 const WeatherCard = () => {
   const [weatherData, setWeatherData] = useState(null);
   const [error, setError] = useState(false);
   const [weatherIcon, setWeatherIcon] = useState('');
-  const [isCollapsed, setIsCollapsed] = useState(false); 
-  const [isMobileOpen, setIsMobileOpen] = useState(false); 
 
   const apikey = 'f6145973562b5173e9accc6e640816a5';
   const apiURL = 'https://api.openweathermap.org/data/2.5/weather?units=metric&';
@@ -75,59 +72,38 @@ const WeatherCard = () => {
     getLocation();
   }, []);
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileOpen(!isMobileOpen);
-  };
-
   return (
-    <div>
-      {/* Menu colapsado em dispositivos móveis */}
-      <div className="mobile-header">
-        <div className="toggle-button-mobile" onClick={toggleMobileMenu}>
-          <BsList className="toggle-icon-mobile" />
+    <div className="card">
+      {error && (
+        <div className="error">
+          <p>Não foi possível encontrar a localização.</p>
         </div>
-      </div>
+      )}
 
-      <div className={`card ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
-        <div className="toggle-button" onClick={toggleCollapse}>
-          <BsList className="toggle-icon" />
-        </div>
-
-        {error && (
-          <div className="error">
-            <p>Não foi possível encontrar a localização.</p>
-          </div>
-        )}
-
-        {/* Exibir conteúdo do painel somente se não estiver colapsado */}
-        {!isCollapsed && weatherData && (
-          <div className="weather">
-            <img src={weatherIcon} className="weather-icon" alt="Weather Icon" />
-            <h1 className="temp">{Math.round(weatherData.main.temp)}°C</h1>
-            <h2 className="city">{weatherData.name}</h2>
-            <div className="details">
-              <div className="col">
-                <img src={humidity} alt="Humidity Icon" />
-                <div>
-                  <p className="humidity">{weatherData.main.humidity}%</p>
-                  <p className="humidade">Humidade</p>
-                </div>
+      {/* Exibir conteúdo do painel */}
+      {weatherData && (
+        <div className="weather">
+          <img src={weatherIcon} className="weather-icon" alt="Weather Icon" />
+          <h1 className="temp">{Math.round(weatherData.main.temp)}°C</h1>
+          <h2 className="city">{weatherData.name}</h2>
+          <div className="details">
+            <div className="col">
+              <img src={humidity} alt="Humidity Icon" />
+              <div>
+                <p className="humidity">{weatherData.main.humidity}%</p>
+                <p className="humidade">Humidade</p>
               </div>
-              <div className="col">
-                <img src={wind} alt="Wind Icon" />
-                <div>
-                  <p className="wind">{weatherData.wind.speed} km/h</p>
-                  <p className="velocidade">Vento</p>
-                </div>
+            </div>
+            <div className="col">
+              <img src={wind} alt="Wind Icon" />
+              <div>
+                <p className="wind">{weatherData.wind.speed} km/h</p>
+                <p className="velocidade">Vento</p>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

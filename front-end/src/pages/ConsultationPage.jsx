@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import MenuSide from '../components/Sidebar/MenuSide';
 import TextareaQuestion from '../components/TextareaQuestion/TextareaQuestion';
 import Loading from '../components/LoadingWave/Loading';
-
 import mascoteImg from '../assets/Mascote.png';
 import './ConsultationPage.css';
 
@@ -12,6 +11,7 @@ const ConsultationPage = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Função para buscar as mensagens da consulta
   const fetchMessages = async (id) => {
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${id}`, {
@@ -35,6 +35,7 @@ const ConsultationPage = () => {
     }
   };
 
+  // Efeito para carregar mensagens ao montar o componente
   useEffect(() => {
     if (consultationId) {
       fetchMessages(consultationId);
@@ -42,6 +43,7 @@ const ConsultationPage = () => {
   }, [consultationId]);
 
   const handleNewQuestion = (newQuestion) => {
+    // Adiciona a nova mensagem ao estado local
     const newMessage = { question: newQuestion, answer: 'Buscando resposta...' };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
@@ -51,16 +53,16 @@ const ConsultationPage = () => {
       <MenuSide />
       <div className="content-container">
         <div className="consultation-area">
-          <div className="consultation-display">
+          <div className="consultation-display scrollable-section">
             {isLoading ? (
               <Loading />
             ) : (
               messages.map((message, index) => (
                 <div className="messages" key={index}>
-                  <p className="question-text"><strong>Pergunta:</strong> {message.question}</p>
+                  <p className="question-text">{message.question}</p>
                   <div className="answer-wrapper">
                     <img src={mascoteImg} alt="Mascote" />
-                    <p className="answer-text"><strong>Resposta:</strong> {message.answer}</p>
+                    <p className="answer-text">{message.answer}</p>
                   </div>
                 </div>
               ))

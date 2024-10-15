@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';  
-import { Bell, PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
-import { useNavigate, Link } from 'react-router-dom'; // Importar useNavigate
+import { useEffect, useState } from 'react';
+import { PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
+import { useNavigate, Link } from 'react-router-dom';
+import WeatherCard from '../WeatherCard/WeatherCard';  // Importe o WeatherCard
 import './Sidebar.css';
 import mascoteImg from '../../assets/Mascote.png';
 import atmosLogo from '../../assets/Atmos.png';
@@ -8,7 +9,7 @@ import ModalConfig from '../Modal/ModalConfig';
 
 const MenuSide = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false); 
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [consultas, setConsultas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,46 +24,49 @@ const MenuSide = () => {
   };
 
   const handleOpenSettingsModal = () => {
-    setShowSettingsModal(true); 
+    setShowSettingsModal(true);
   };
 
   const handleCloseSettingsModal = () => {
     setShowSettingsModal(false);
   };
 
-  // Função para buscar as consultas do usuário
   const fetchConsultas = async () => {
     try {
       const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
-        setConsultas(data); // Atualiza o estado com as consultas retornadas
+        setConsultas(data);
       } else {
         console.error('Erro ao buscar consultas:', response.status);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
-  // useEffect para buscar as consultas ao montar o componente
   useEffect(() => {
     fetchConsultas();
   }, []);
 
-  // Função para navegar até a página da conversa
   const handleNavigateToConversation = (consultationId) => {
     console.log('ID da consulta:', consultationId);
     navigate(`/consulta/${consultationId}`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    
+    navigate('/'); 
   };
 
   return (
@@ -90,7 +94,7 @@ const MenuSide = () => {
 
         <div className="menu">
           <div className="menu-item">
-            <Link className='new-consultation' to="/nova-consulta">
+            <Link className="new-consultation" to="/nova-consulta">
               <PencilSquare className="icon" />
               {!isCollapsed && <span>NOVA CONSULTA</span>}
             </Link>
@@ -110,10 +114,10 @@ const MenuSide = () => {
                 ) : (
                   consultas && consultas.length > 0 ? (
                     consultas.map((consulta, index) => (
-                      <div 
-                        className='conversation-item' 
+                      <div
+                        className="conversation-item"
                         key={index}
-                        onClick={() => handleNavigateToConversation(consulta._id)} 
+                        onClick={() => handleNavigateToConversation(consulta._id)}
                       >
                         <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
                       </div>
@@ -129,17 +133,7 @@ const MenuSide = () => {
           </div>
 
           <div className="menu-section">
-            <div className="menu-item">
-              <Bell className='icon'/>
-              {!isCollapsed && <span>NOTIFICAÇÕES</span>}
-            </div>
-            {!isCollapsed && (
-              <div className="notification-list scrollable-section">
-                <div className="notification-item">Nova previsão de chuva</div>
-                <div className="notification-item">Alerta de ventania</div>
-                <div className="notification-item">Temperatura subiu 5ºC</div>
-              </div>
-            )}
+            {!isCollapsed && <WeatherCard />}
           </div>
 
           <div className="menu-section">
@@ -147,7 +141,7 @@ const MenuSide = () => {
               <Gear className="icon" />
               {!isCollapsed && <span>CONFIGURAÇÕES</span>}
             </div>
-            <div className="menu-item">
+            <div className="menu-item" onClick={handleLogout}>
               <BoxArrowLeft className="icon" />
               {!isCollapsed && <span>SAIR DA CONTA</span>}
             </div>

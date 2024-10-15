@@ -1,91 +1,24 @@
 .card {
     font-family: 'Oxygen';
-    width: 240px; /* Largura do card */
+    width: 240px;
     background: linear-gradient(135deg, #3b3a3a 50%, #574d5c 80%, transparent 100%, #FF8AFB 100%);
     color: #fff;
-    padding: 16px; 
-    padding: 16px; 
+    padding: 10px; /* Reduzindo o padding */
     text-align: center;
     border-radius: 20px;
-    height: 235px;
+    height: auto;
     padding-top: 0px;
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    z-index: 10;
-    transition: all 0.3s ease; /* Adicionando uma transição suave */
-    transition: all 0.3s ease; 
+    z-index: 15; /* Garantindo que o card fique acima de outros elementos */
+    transition: all 0.3s ease; /* Transição suave */
 }
 
-.card.collapsed {
+/* .card.collapsed {
     width: 55px; 
     height: 55px; 
     padding: 10px; 
     overflow: hidden; 
     transition: all 0.3s ease;
-}
-
-.toggle-button {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    cursor: pointer;
-}
-
-.toggle-icon {
-    font-size: 24px;
-    color: #fff;
-}
-
-.mobile-header {
-    display: none; /*esconder o header mobile */
-    display: none; 
-}
-
-/* Estilo para o card no modo mobile */
-@media (max-width: 768px) {
-    .card {
-        top: 5px;
-        right: 5px;
-    }
-
-    .mobile-header {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        background-color: #574d5c;
-    }
-
-    .toggle-icon-mobile {
-        font-size: 24px;
-        color: #fff;
-        cursor: pointer;
-    }
-
-    .mobile-open .card {
-        top: 10px;
-        right: 10px;
-    }
-}
-
-
-.weather {
-    display: block;
-}
-
-.card.collapsed .weather {
-    display: none; /* Esconder o conteúdo de clima no modo colapsado */
-}
-
-/* Ajustes gerais para os detalhes de temperatura e ícones */
-.weather {
-    margin-top: 10px;
-}
-
-.weather-icon {
-    width: 60px;
-    margin-top: 15px;
-}
+} */
 
 .weather img {
     width: 100px;
@@ -107,8 +40,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 10px;
-    margin-top: 10px;
+    padding: 10px;
 }
 
 .col {
@@ -125,16 +57,16 @@
     width: 20px;
     margin-right: 5px;
     margin-top: -11px;
-    margin-left: -3px;
+    /* margin-left: -3px; */
 }
 
-
-.humidity{
+.humidity {
     font-size: 15px;
     margin-top: 5px;
     font-weight: 500;
     margin-left: 0px;
 }
+
 .wind {
     font-size: 15px;
     margin-top: 5px;
@@ -157,8 +89,7 @@
     margin-left: 0px;
 }
 
-
-.error{
+.error {
     font-size: 14px;
     margin-top: 100px;
     font-weight: 400;
