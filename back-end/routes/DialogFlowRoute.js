@@ -65,7 +65,7 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
       case "Temperatura":
         await handleTemperaturaIntent(cidade, consultation, res); // Chama a intent de temperatura
         break;
-      case "Poluição do Ar":
+      case "PoluiçaoDoAr":
         await poluicaoArIntent(cidade, consultation, res); // Já existente
         break;
       default:
