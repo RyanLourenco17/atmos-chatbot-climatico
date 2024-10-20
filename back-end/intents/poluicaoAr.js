@@ -2,9 +2,12 @@ const fetch = require('node-fetch');
 const Message = require("../models/Message");
 const Consultation = require("../models/Consultation");
 
+// Importando a biblioteca OpenWeatherMapHelper
+const OpenWeatherMapHelper = require('openweathermap-node');
+
 const fetchAirPollution = async (lat, lon) => {
   const apiKey = process.env.OPENWEATHER_API_KEY;
-  const url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+  const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`;
 
   try {
     const response = await fetch(url);
