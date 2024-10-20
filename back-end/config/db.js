@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const authRoute = require('../routes/AuthRoute');
 const userRoute = require('../routes/UserRoute');
 const dialogflowRoute = require('../routes/DialogFlowRoute');
-const hello = require('../routes/hello');
 
 // Middlewares
 const verifyToken = require('../middlewares/VerificarToken');
@@ -33,7 +32,6 @@ app.use(express.static('public'));
 app.use('/api/auth', authRoute);
 app.use('/api/user', verifyToken, userRoute);
 app.use('/api/dialogflow', verifyToken, dialogflowRoute);
-app.use('/hello', hello);
 
 // Configurando o servidor e a porta do Express.js
 const port = process.env.PORT || 10000;
