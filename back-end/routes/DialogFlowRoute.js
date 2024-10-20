@@ -32,7 +32,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
       case "Temperatura":
         await handleTemperaturaIntent(cidade, newConsultation);
         break;
-      case "PoluicaoDoAr":
+      case "PoluiçaoDoAr":
         await poluicaoArIntent(cidade, newConsultation, res);
         break;
       // Outros intents podem ser adicionados aqui
