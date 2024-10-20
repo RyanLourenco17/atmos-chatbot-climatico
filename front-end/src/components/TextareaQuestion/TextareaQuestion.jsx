@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MicFill, Send } from 'react-bootstrap-icons';
 import './Textarea.css';
 
-const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultationId }) => {
+const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultationId, intent }) => {
   const [question, setQuestion] = useState('');
 
   const handleInputChange = (e) => {
@@ -21,7 +21,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
       let url = 'https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta';
       let bodyContent = {
         queryResult: {
-          intent: { displayName: 'Temperatura' },
+          intent: { displayName: intent || 'Temperatura' },
           parameters: { 'Cidade': question }
         }
       };
@@ -30,7 +30,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
         url = `https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/adicionar-mensagem/${consultationId}`;
         bodyContent = {
           queryResult: {
-            intent: { displayName: 'Temperatura' },
+            intent: { displayName: intent || 'Temperatura' },
             parameters: { 'Cidade': question }
           }
         };
