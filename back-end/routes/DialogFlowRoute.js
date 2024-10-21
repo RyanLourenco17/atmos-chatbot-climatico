@@ -4,9 +4,10 @@ const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
-const poluicaoArIntent = require('../intents/poluicaoAr')
+const poluicaoArIntent = require('../intents/poluicaoAr');
 const handleTemperaturaIntent = require('../intents/temperatura');
 
+// Configuração do helper do OpenWeather
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
   units: "metric",
@@ -16,7 +17,20 @@ const helper = new OpenWeatherMapHelper({
 router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
-  const cidade = req.body.queryResult.parameters['Cidade'];
+  let cidade = req.body.queryResult.parameters['Cidade'];
+
+  // Se não encontrar a cidade nos parâmetros, tenta extrair do queryText
+  if (!cidade || cidade === '') {
+    const queryText = req.body.queryResult.queryText;
+    const match = queryText.match(/em\s+(\w+)/i); // Exemplo de regex para encontrar "em [Cidade]"
+    if (match) {
+      cidade = match[1]; // Captura a cidade encontrada na frase
+    }
+  }
+
+  if (!cidade) {
+    return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade para realizar a consulta." });
+  }
 
   try {
     const newConsultation = new Consultation({
@@ -26,21 +40,16 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
     await newConsultation.save();
 
-    let response = '';
-
     switch (intentName) {
       case "Temperatura":
-        await handleTemperaturaIntent(cidade, newConsultation);
+        await handleTemperaturaIntent(cidade, newConsultation, res, req.body.queryResult.queryText);
         break;
       case "PoluiçaoDoAr":
         await poluicaoArIntent(cidade, newConsultation, res);
         break;
-      // Outros intents podem ser adicionados aqui
       default:
-        response = { fulfillmentText: "Desculpe, não entendi sua solicitação." };
+        res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
     }
-
-    res.json(response);
   } catch (error) {
     console.error('Erro ao criar nova consulta:', error);
     res.status(500).json({ "fulfillmentText": "Houve um erro ao criar a consulta." });
@@ -52,7 +61,19 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   const userId = req.userId;
   const { id } = req.params;
   const intentName = req.body.queryResult.intent.displayName;
-  const cidade = req.body.queryResult.parameters['Cidade'];
+  let cidade = req.body.queryResult.parameters['Cidade'];
+
+  if (!cidade || cidade === '') {
+    const queryText = req.body.queryResult.queryText;
+    const match = queryText.match(/em\s+(\w+)/i); // Exemplo de regex para encontrar "em [Cidade]"
+    if (match) {
+      cidade = match[1];
+    }
+  }
+
+  if (!cidade) {
+    return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade para realizar a consulta." });
+  }
 
   try {
     const consultation = await Consultation.findOne({ _id: id, user: userId });
@@ -63,10 +84,10 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
 
     switch (intentName) {
       case "Temperatura":
-        await handleTemperaturaIntent(cidade, consultation, res); // Chama a intent de temperatura
+        await handleTemperaturaIntent(cidade, consultation, res, req.body.queryResult.queryText);
         break;
       case "PoluiçaoDoAr":
-        await poluicaoArIntent(cidade, consultation, res); // Já existente
+        await poluicaoArIntent(cidade, consultation, res);
         break;
       default:
         res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
@@ -76,7 +97,6 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
-
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
@@ -102,10 +122,9 @@ router.get('/consultas', verifyToken, async (req, res) => {
 // Rota para pegar informações detalhadas de uma consulta específica
 router.get('/consultas/:id', verifyToken, async (req, res) => {
   const userId = req.userId;
-  const consultationId = req.params.id; // ID da consulta
+  const consultationId = req.params.id;
 
   try {
-    // Encontra a consulta pelo ID e verifica se pertence ao usuário
     const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
       .populate('messages');
 
@@ -120,15 +139,14 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
   }
 });
 
-
 // Rota para deletar uma consulta específica
 router.delete('/consultas/:id', verifyToken, async (req, res) => {
   const userId = req.userId;
-  const consultationId = req.params.id; // ID da consulta
+  const consultationId = req.params.id;
 
   try {
     const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
-  .populate('messages', 'question answer');
+      .populate('messages', 'question answer');
 
     if (!consultation) {
       return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });

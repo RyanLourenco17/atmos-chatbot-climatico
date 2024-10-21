@@ -6,7 +6,7 @@ const helper = new OpenWeatherMapHelper({
   units: "metric",
 });
 
-async function handleTemperaturaIntent(cidade, consultation, res) {
+async function handleTemperaturaIntent(cidade, consultation, res, queryText) {
   if (!cidade) {
     return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });
   }
@@ -42,17 +42,19 @@ async function handleTemperaturaIntent(cidade, consultation, res) {
         "Nascer do sol: " + nascerDoSol + "\n" +
         "Pôr do sol: " + porDoSol;
 
-      // Cria a mensagem para a consulta
-      const newMessage = new Message({ question: cidade, answer: resposta });
+      // Cria a mensagem para a consulta, agora usando o queryText para salvar a pergunta completa do usuário
+      const newMessage = new Message({ question: queryText, answer: resposta });
       await newMessage.save();
 
       // Adiciona a mensagem à consulta
       consultation.messages.push(newMessage._id);
       await consultation.save();
 
-      res.json({ "fulfillmentText": resposta });
+      // Responde ao cliente
+      res.json({ "fulfillmentText": resposta, consultationId: consultation._id });
     }
   });
 }
+
 
 module.exports = handleTemperaturaIntent;

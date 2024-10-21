@@ -30,52 +30,53 @@ const poluicaoArIntent = async (cidade, newConsultation, res) => {
     units: "metric",
   });
 
-  // Busca os dados de clima da cidade
-  helper.getCurrentWeatherByCityName(cidade, async (err, currentWeather) => {
-    if (err) {
-      console.log(err);
-      return res.json({ "fulfillmentText": "Desculpe, houve um erro ao buscar os dados da cidade." });
-    } else {
-      const lat = currentWeather.coord.lat;
-      const lon = currentWeather.coord.lon;
+  try {
+    // Busca os dados de clima da cidade
+    const currentWeather = await new Promise((resolve, reject) => {
+      helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
+        if (err) reject(err);
+        else resolve(currentWeather);
+      });
+    });
 
-      try {
-        // Obtemos os dados de poluição do ar com as coordenadas
-        const pollutionData = await fetchAirPollution(lat, lon);
+    const lat = currentWeather.coord.lat;
+    const lon = currentWeather.coord.lon;
 
-        // Extraindo informações de poluição do ar
-        const qualidadeAr = pollutionData.list[0].main.aqi;
-        const pm2_5 = pollutionData.list[0].components.pm2_5;
-        const pm10 = pollutionData.list[0].components.pm10;
-        const no2 = pollutionData.list[0].components.no2;
-        const o3 = pollutionData.list[0].components.o3;
-        const co = pollutionData.list[0].components.co;
+    // Obtemos os dados de poluição do ar com as coordenadas
+    const pollutionData = await fetchAirPollution(lat, lon);
 
-        const resposta =
-          "Cidade: " + cidade + "\n" +
-          "Qualidade do Ar (1-5): " + qualidadeAr + "\n" +
-          "PM2.5: " + pm2_5 + " µg/m³\n" +
-          "PM10: " + pm10 + " µg/m³\n" +
-          "NO2: " + no2 + " µg/m³\n" +
-          "O3: " + o3 + " µg/m³\n" +
-          "CO: " + co + " µg/m³";
+    // Extraindo informações de poluição do ar
+    const qualidadeAr = pollutionData.list[0].main.aqi;
+    const pm2_5 = pollutionData.list[0].components.pm2_5;
+    const pm10 = pollutionData.list[0].components.pm10;
+    const no2 = pollutionData.list[0].components.no2;
+    const o3 = pollutionData.list[0].components.o3;
+    const co = pollutionData.list[0].components.co;
 
-        // Cria uma nova mensagem com a resposta
-        const newMessage = new Message({ question: cidade, answer: resposta });
-        await newMessage.save();
+    const resposta =
+      "Cidade: " + cidade + "\n" +
+      "Qualidade do Ar (1-5): " + qualidadeAr + "\n" +
+      "PM2.5: " + pm2_5 + " µg/m³\n" +
+      "PM10: " + pm10 + " µg/m³\n" +
+      "NO2: " + no2 + " µg/m³\n" +
+      "O3: " + o3 + " µg/m³\n" +
+      "CO: " + co + " µg/m³";
 
-        // Adiciona a mensagem à consulta
-        newConsultation.messages.push(newMessage._id);
-        await newConsultation.save();
+    // Cria uma nova mensagem com a resposta
+    const newMessage = new Message({ question: cidade, answer: resposta });
+    await newMessage.save();
 
-        // Responde ao cliente
-        res.json({ "fulfillmentText": resposta, consultationId: newConsultation._id });
-      } catch (error) {
-        console.error("Erro ao buscar dados de poluição do ar:", error);
-        return res.json({ "fulfillmentText": "Desculpe, não conseguimos obter os dados de poluição do ar." });
-      }
-    }
-  });
+    // Adiciona a mensagem à consulta
+    newConsultation.messages.push(newMessage._id);
+    await newConsultation.save();
+
+    // Responde ao cliente
+    res.json({ "fulfillmentText": resposta, consultationId: newConsultation._id });
+  } catch (error) {
+    console.error("Erro ao buscar dados de poluição do ar:", error);
+    return res.json({ "fulfillmentText": "Desculpe, não conseguimos obter os dados de poluição do ar." });
+  }
 };
+
 
 module.exports = poluicaoArIntent;
