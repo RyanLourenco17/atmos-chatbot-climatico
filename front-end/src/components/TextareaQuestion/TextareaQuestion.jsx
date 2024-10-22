@@ -9,20 +9,29 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
     setQuestion(e.target.value);
   };
 
+  const extractCityFromQuestion = (question) => {
+    const match = question.match(/em\s+([a-zA-Z\s]+)/i);
+    return match ? match[1].trim() : question; // Retorna a cidade ou a pergunta original
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
 
     if (question.trim() === '') {
       alert('Por favor, insira uma pergunta.');
       return;
     }
 
+    // Extrai a cidade da pergunta
+    const city = extractCityFromQuestion(question);
+
     try {
       let url = 'https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta';
       let bodyContent = {
         queryResult: {
           intent: { displayName: intent || 'Temperatura' },
-          parameters: { 'Cidade': question }
+          parameters: { Cidade: city }
         }
       };
 
@@ -31,7 +40,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
         bodyContent = {
           queryResult: {
             intent: { displayName: intent || 'Temperatura' },
-            parameters: { 'Cidade': question }
+            parameters: { Cidade: city }
           }
         };
       }

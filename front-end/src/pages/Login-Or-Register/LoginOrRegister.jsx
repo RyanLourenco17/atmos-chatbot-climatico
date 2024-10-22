@@ -122,7 +122,7 @@ const LoginOrRegister = () => {
           setMessage(data.message);
           localStorage.setItem('token', data.token);
           localStorage.setItem('userId', data.userId);
-          navigate('/nova-conversa');
+          navigate('/nova-consulta');
         } else {
           setMessage(data.error);
         }
