@@ -71,7 +71,7 @@
 
 .conversation-item p {
     margin-bottom: 0;
-    max-width: 150px;
+    max-width: 190px;
     white-space: nowrap; /* Evita que o texto quebre em várias linhas */
     overflow: hidden;
     text-overflow: ellipsis; /* Adiciona "..." no final para indicar que o texto foi cortado */
