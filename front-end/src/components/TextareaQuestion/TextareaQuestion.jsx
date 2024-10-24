@@ -17,7 +17,6 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
     if (question.trim() === '') {
       alert('Por favor, insira uma pergunta.');
       return;
@@ -28,7 +27,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
 
     try {
       let url = 'https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/nova-consulta';
-      let bodyContent = {
+      const bodyContent = {
         queryResult: {
           intent: { displayName: intent || 'Temperatura' },
           parameters: { Cidade: city }
@@ -37,12 +36,6 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
 
       if (isMessageMode && consultationId) {
         url = `https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/adicionar-mensagem/${consultationId}`;
-        bodyContent = {
-          queryResult: {
-            intent: { displayName: intent || 'Temperatura' },
-            parameters: { Cidade: city }
-          }
-        };
       }
 
       const response = await fetch(url, {
@@ -63,9 +56,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
 
       // Adiciona a nova pergunta à interface
       onNewQuestion(question);
-
-      // Limpa o campo de pergunta
-      setQuestion('');
+      setQuestion(''); // Limpa o campo de pergunta
 
       // Navega para a página da consulta após o sucesso da requisição, se necessário
       if (onSubmit) {

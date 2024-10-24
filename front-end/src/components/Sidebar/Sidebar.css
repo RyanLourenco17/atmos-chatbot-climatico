@@ -53,11 +53,11 @@
     font-size: 14px;
 }
 
-.notification-list, .conversation-list {
+.conversation-list {
     height: 20vh;
 }
 
-.notification-item, .conversation-item {
+.conversation-item {
     margin-bottom: 5px;
     padding: 10px;
     border-radius: 4px;
@@ -65,18 +65,31 @@
     font-family: 'Oxygen';
     font-weight: bold;
     cursor: pointer;
+    display: flex;
+    justify-content: space-between;
 }
 
-.conversation-item p{
+.conversation-item p {
     margin-bottom: 0;
+    max-width: 150px;
+    white-space: nowrap; /* Evita que o texto quebre em várias linhas */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adiciona "..." no final para indicar que o texto foi cortado */
+}
+
+.conversation-item .delete-icon{
+    font-size: 25px;
+    border-radius: 1rem;
+    padding: .2rem;
+}
+
+.conversation-item .delete-icon:hover{
+    color: var(--white-color);
+    background-color: var(--error-color);
 }
 
 
-.notification-item {
-    background-color: #3b3a3a;
-}
-
-.notification-item:hover, .conversation-item:hover {
+.conversation-item:hover {
     background-color: var(--white-color);
     color: var(--black-color);
 }

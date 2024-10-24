@@ -24,7 +24,7 @@ const fetchAirPollution = async (lat, lon) => {
   }
 };
 
-const poluicaoArIntent = async (cidade, newConsultation, res) => {
+const poluicaoArIntent = async (cidade, newConsultation, res, queryText) => {
   const helper = new OpenWeatherMapHelper({
     APPID: process.env.OPENWEATHER_API_KEY,
     units: "metric",
@@ -62,8 +62,8 @@ const poluicaoArIntent = async (cidade, newConsultation, res) => {
       "O3: " + o3 + " µg/m³\n" +
       "CO: " + co + " µg/m³";
 
-    // Cria uma nova mensagem com a resposta
-    const newMessage = new Message({ question: cidade, answer: resposta });
+    // Cria uma nova mensagem como pergunta e a resposta
+    const newMessage = new Message({ question: queryText, answer: resposta });
     await newMessage.save();
 
     // Adiciona a mensagem à consulta

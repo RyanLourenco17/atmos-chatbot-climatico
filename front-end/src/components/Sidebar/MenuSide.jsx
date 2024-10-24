@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf } from 'react-bootstrap-icons';
+import { PencilSquare, ClockHistory, Gear, BoxArrowLeft, SquareHalf, Trash } from 'react-bootstrap-icons';
 import { useNavigate, Link } from 'react-router-dom';
 import WeatherCard from '../WeatherCard/WeatherCard';  // Importe o WeatherCard
 import './Sidebar.css';
@@ -63,10 +63,32 @@ const MenuSide = () => {
     navigate(`/consulta/${consultationId}`);
   };
 
+  const handleDeleteConsulta = async (consultationId) => {
+    const confirmed = window.confirm('Tem certeza que deseja deletar esta consulta?');
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${consultationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setConsultas(prevConsultas => prevConsultas.filter(consulta => consulta._id !== consultationId));
+      } else {
+        console.error('Erro ao deletar consulta:', response.status);
+      }
+    } catch (error) {
+      console.error('Erro na requisição de deletar consulta:', error);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
-    
-    navigate('/'); 
+    navigate('/');
   };
 
   return (
@@ -114,12 +136,14 @@ const MenuSide = () => {
                 ) : (
                   consultas && consultas.length > 0 ? (
                     consultas.map((consulta, index) => (
-                      <div
-                        className="conversation-item"
-                        key={index}
-                        onClick={() => handleNavigateToConversation(consulta._id)}
-                      >
-                        <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
+                      <div className="conversation-item" key={index}>
+                        <div onClick={() => handleNavigateToConversation(consulta._id)}>
+                          <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
+                        </div>
+                        <Trash
+                          className="delete-icon"
+                          onClick={() => handleDeleteConsulta(consulta._id)}
+                        />
                       </div>
                     ))
                   ) : (

@@ -45,7 +45,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
         await handleTemperaturaIntent(cidade, newConsultation, res, req.body.queryResult.queryText);
         break;
       case "PoluiçaoDoAr":
-        await poluicaoArIntent(cidade, newConsultation, res);
+        await poluicaoArIntent(cidade, newConsultation, res, req.body.queryResult.queryText);
         break;
       default:
         res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
