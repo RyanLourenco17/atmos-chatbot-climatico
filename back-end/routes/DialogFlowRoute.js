@@ -91,21 +91,21 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ "fulfillmentText": "Consulta não encontrada ou não pertence ao usuário." });
     }
 
-    // Lidar com a intent dinamicamente
-    const result = await lidarComIntent(intentName, cidade, consultation, res, req.body.queryResult.queryText);
+    // Lidar com a intent dinamicamente e salvar a resposta
+    const result = await lidarComIntent(intentName, cidade, consultation, req.body.queryResult.queryText);
 
-    // Aqui você pode querer salvar a nova mensagem
+    // Cria e salva a nova mensagem no banco de dados
     const newMessage = new Message({
       question: req.body.queryResult.queryText,
       answer: result.fulfillmentText || "Desculpe, não consegui responder a sua pergunta."
     });
 
-    // Salvar a mensagem na consulta
     consultation.messages.push(newMessage._id);
     await newMessage.save();
     await consultation.save();
 
-    res.json(newMessage); // Retornar a nova mensagem como resposta
+    // Enviar resposta ao cliente
+    res.json(newMessage);
 
   } catch (error) {
     console.error('Erro ao adicionar mensagem:', error);
