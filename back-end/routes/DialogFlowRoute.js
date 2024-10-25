@@ -18,7 +18,7 @@ function extrairCidade(queryResult) {
   let cidade = queryResult.parameters['Cidade'];
   if (!cidade || cidade === '') {
     const queryText = queryResult.queryText;
-    const match = queryText.match(/em\s+(\w+)/i); // Regex para encontrar "em [Cidade]"
+    const match = queryText.match(/em\s+(\w+)/i);
     if (match) {
       cidade = match[1];
     }
@@ -27,12 +27,11 @@ function extrairCidade(queryResult) {
 }
 
 // Função para lidar com a intent com base no nome
-async function lidarComIntent(intentName, cidade, consulta, res, queryText, outputContexts) {
-  console.log("Output Contexts:", outputContexts);
+async function lidarComIntent(intentName, cidade, consulta, res, queryText) {
 
   switch (intentName) {
     case "Temperatura":
-      return await handleTemperaturaIntent(cidade, consulta, res, queryText, outputContexts);
+      return await handleTemperaturaIntent(cidade, consulta, res, queryText);
     case "PoluiçaoDoAr":
       return await poluicaoArIntent(cidade, consulta, res, queryText);
     default:
@@ -44,7 +43,7 @@ async function lidarComIntent(intentName, cidade, consulta, res, queryText, outp
 router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
-  const { parameters, outputContexts } = req.body.queryResult;
+  const { parameters} = req.body.queryResult;
 
   const cidade = extrairCidade(req.body.queryResult);
 
@@ -61,7 +60,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
     await newConsultation.save();
 
     // Lidar com a intent dinamicamente
-    await lidarComIntent(intentName, cidade, newConsultation, res, req.body.queryResult.queryText, outputContexts);
+    await lidarComIntent(intentName, cidade, newConsultation, res, req.body.queryResult.queryText);
 
   } catch (error) {
     console.error('Erro ao criar nova consulta:', error);

@@ -6,7 +6,7 @@ const helper = new OpenWeatherMapHelper({
   units: "metric",
 });
 
-async function handleTemperaturaIntent(cidade, consultation, res, queryText, outputContexts) {
+async function handleTemperaturaIntent(cidade, consultation, res, queryText) {
   if (!cidade) {
     return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade para obter a previsão de temperatura." });
   }
