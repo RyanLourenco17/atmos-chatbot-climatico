@@ -26,7 +26,13 @@ const NewConversation = () => {
         <div className="interactive-area">
           <Loading />
           <CardSugestion />
-          <TextareaQuestion onSubmit={handleSubmit} isMessageMode={false} onNewQuestion={handleNewQuestion} />
+          <TextareaQuestion 
+            onSubmit={handleSubmit} 
+            isMessageMode={false} 
+            onNewQuestion={handleNewQuestion} 
+            intent="Temperatura" // Ou a intent que você deseja passar
+          />
+
         </div>
       </div>
     </div>

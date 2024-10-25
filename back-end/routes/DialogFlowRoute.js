@@ -7,9 +7,9 @@ const verifyToken = require('../middlewares/VerificarToken');
 const poluicaoArIntent = require('../intents/poluicaoAr');
 const handleTemperaturaIntent = require('../intents/temperatura');
 
-const dialogflow = require('@google-cloud/dialogflow');
-const sessionClient = new dialogflow.SessionsClient();
-const projectId = 'my-project-chatbot-435418';
+// const dialogflow = require('@google-cloud/dialogflow');
+// const sessionClient = new dialogflow.SessionsClient();
+// const projectId = 'atmos-goat';
 
 // Configuração do helper do OpenWeather
 const helper = new OpenWeatherMapHelper({
@@ -31,27 +31,33 @@ function extrairCidade(queryResult) {
 }
 
 // Função para lidar com a intent com base no nome
-async function lidarComIntent(intentName, cidade, consulta, res, queryText) {
+async function lidarComIntent(intentName, cidade, consulta, res, queryText, outputContexts) {
+  // Aqui você pode usar os contextos para decidir o que fazer
+  console.log("Output Contexts:", outputContexts);
+
   switch (intentName) {
     case "Temperatura":
-      await handleTemperaturaIntent(cidade, consulta, res, queryText);
+      await handleTemperaturaIntent(cidade, consulta, res, queryText, outputContexts);
       break;
     case "PoluiçaoDoAr":
-      await poluicaoArIntent(cidade, consulta, res, queryText);
+      await poluicaoArIntent(cidade, consulta, res, queryText, outputContexts);
       break;
     default:
       res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
   }
 }
 
+
 // Rota para criar uma nova consulta
 router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
-  let cidade = extrairCidade(req.body.queryResult);
+  const { parameters, outputContexts } = req.body.queryResult; // Adicionamos outputContexts aqui
 
-  if (!cidade) {
-    return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade para realizar a consulta." });
+  const cidade = extrairCidade(req.body.queryResult);
+
+  if (!parameters || !parameters.Cidade) {
+    return res.status(400).json({ error: "Cidade não fornecida." });
   }
 
   try {
@@ -62,13 +68,16 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
     await newConsultation.save();
 
-    await lidarComIntent(intentName, cidade, newConsultation, res, req.body.queryResult.queryText);
+    // Lidar com a intent dinamicamente
+    await lidarComIntent(intentName, cidade, newConsultation, res, req.body.queryResult.queryText, outputContexts);
 
   } catch (error) {
     console.error('Erro ao criar nova consulta:', error);
     res.status(500).json({ "fulfillmentText": "Houve um erro ao criar a consulta." });
   }
 });
+
+
 
 // Rota para adicionar uma nova mensagem em uma consulta existente
 router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {

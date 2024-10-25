@@ -70,7 +70,13 @@ const ConsultationPage = () => {
           </div>
         </div>
         <div className="interactive-area">
-          <TextareaQuestion onNewQuestion={handleNewQuestion} isMessageMode={true} consultationId={consultationId} />
+        <TextareaQuestion 
+          onNewQuestion={handleNewQuestion} 
+          isMessageMode={true} 
+          consultationId={consultationId} 
+          intent="Temperatura"
+        />
+
         </div>
       </div>
     </div>
