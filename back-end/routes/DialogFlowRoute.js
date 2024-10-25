@@ -7,10 +7,6 @@ const verifyToken = require('../middlewares/VerificarToken');
 const poluicaoArIntent = require('../intents/poluicaoAr');
 const handleTemperaturaIntent = require('../intents/temperatura');
 
-// const dialogflow = require('@google-cloud/dialogflow');
-// const sessionClient = new dialogflow.SessionsClient();
-// const projectId = 'atmos-goat';
-
 // Configuração do helper do OpenWeather
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
@@ -32,27 +28,23 @@ function extrairCidade(queryResult) {
 
 // Função para lidar com a intent com base no nome
 async function lidarComIntent(intentName, cidade, consulta, res, queryText, outputContexts) {
-  // Aqui você pode usar os contextos para decidir o que fazer
   console.log("Output Contexts:", outputContexts);
 
   switch (intentName) {
     case "Temperatura":
-      await handleTemperaturaIntent(cidade, consulta, res, queryText, outputContexts);
-      break;
+      return await handleTemperaturaIntent(cidade, consulta, res, queryText, outputContexts);
     case "PoluiçaoDoAr":
-      await poluicaoArIntent(cidade, consulta, res, queryText, outputContexts);
-      break;
+      return await poluicaoArIntent(cidade, consulta, res, queryText);
     default:
-      res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
+      return res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
   }
 }
-
 
 // Rota para criar uma nova consulta
 router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const intentName = req.body.queryResult.intent.displayName;
-  const { parameters, outputContexts } = req.body.queryResult; // Adicionamos outputContexts aqui
+  const { parameters, outputContexts } = req.body.queryResult;
 
   const cidade = extrairCidade(req.body.queryResult);
 
@@ -77,13 +69,11 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   }
 });
 
-
 // Rota para adicionar uma nova mensagem em uma consulta existente
 router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   const userId = req.userId;
   const { id } = req.params;
 
-  // Verifique se o corpo da requisição contém o queryResult
   if (!req.body.queryResult) {
     return res.status(400).json({ "fulfillmentText": "Dados da consulta não foram fornecidos." });
   }
@@ -108,7 +98,7 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     // Aqui você pode querer salvar a nova mensagem
     const newMessage = new Message({
       question: req.body.queryResult.queryText,
-      answer: result ? result.fulfillmentText : "Desculpe, não consegui responder a sua pergunta."
+      answer: result.fulfillmentText || "Desculpe, não consegui responder a sua pergunta."
     });
 
     // Salvar a mensagem na consulta
@@ -123,7 +113,6 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
-
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
