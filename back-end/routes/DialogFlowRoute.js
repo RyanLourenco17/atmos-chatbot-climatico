@@ -27,15 +27,14 @@ function extrairCidade(queryResult) {
 }
 
 // Função para lidar com a intent com base no nome
-async function lidarComIntent(intentName, cidade, consulta, res, queryText) {
-
+async function lidarComIntent(intentName, cidade, consulta, queryText) {
   switch (intentName) {
     case "Temperatura":
-      return await handleTemperaturaIntent(cidade, consulta, res, queryText);
+      return await handleTemperaturaIntent(cidade, consulta, queryText);
     case "PoluiçaoDoAr":
-      return await poluicaoArIntent(cidade, consulta, res, queryText);
+      return await poluicaoArIntent(cidade, consulta, queryText);
     default:
-      return res.json({ "fulfillmentText": "Desculpe, não entendi sua solicitação." });
+      return { fulfillmentText: "Desculpe, não entendi sua solicitação." };
   }
 }
 
@@ -78,7 +77,8 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   }
 
   const intentName = req.body.queryResult.intent.displayName;
-  let cidade = extrairCidade(req.body.queryResult);
+  const cidade = extrairCidade(req.body.queryResult);
+  const queryText = req.body.queryResult.queryText;
 
   if (!cidade) {
     return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade para realizar a consulta." });
@@ -91,12 +91,11 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ "fulfillmentText": "Consulta não encontrada ou não pertence ao usuário." });
     }
 
-    // Lidar com a intent dinamicamente e salvar a resposta
-    const result = await lidarComIntent(intentName, cidade, consultation, req.body.queryResult.queryText);
+    const result = await lidarComIntent(intentName, cidade, consultation, queryText);
 
-    // Cria e salva a nova mensagem no banco de dados
+    // Cria e salva a nova mensagem no banco de dados com o resultado da intent
     const newMessage = new Message({
-      question: req.body.queryResult.queryText,
+      question: queryText,
       answer: result.fulfillmentText || "Desculpe, não consegui responder a sua pergunta."
     });
 
