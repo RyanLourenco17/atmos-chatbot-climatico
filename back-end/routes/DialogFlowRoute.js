@@ -78,11 +78,16 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 });
 
 
-
 // Rota para adicionar uma nova mensagem em uma consulta existente
 router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   const userId = req.userId;
   const { id } = req.params;
+
+  // Verifique se o corpo da requisição contém o queryResult
+  if (!req.body.queryResult) {
+    return res.status(400).json({ "fulfillmentText": "Dados da consulta não foram fornecidos." });
+  }
+
   const intentName = req.body.queryResult.intent.displayName;
   let cidade = extrairCidade(req.body.queryResult);
 
@@ -97,13 +102,28 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ "fulfillmentText": "Consulta não encontrada ou não pertence ao usuário." });
     }
 
-    await lidarComIntent(intentName, cidade, consultation, res, req.body.queryResult.queryText);
+    // Lidar com a intent dinamicamente
+    const result = await lidarComIntent(intentName, cidade, consultation, res, req.body.queryResult.queryText);
+
+    // Aqui você pode querer salvar a nova mensagem
+    const newMessage = new Message({
+      question: req.body.queryResult.queryText,
+      answer: result ? result.fulfillmentText : "Desculpe, não consegui responder a sua pergunta."
+    });
+
+    // Salvar a mensagem na consulta
+    consultation.messages.push(newMessage._id);
+    await newMessage.save();
+    await consultation.save();
+
+    res.json(newMessage); // Retornar a nova mensagem como resposta
 
   } catch (error) {
     console.error('Erro ao adicionar mensagem:', error);
     res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
+
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {

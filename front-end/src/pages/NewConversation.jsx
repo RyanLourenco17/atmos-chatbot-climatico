@@ -29,8 +29,7 @@ const NewConversation = () => {
           <TextareaQuestion 
             onSubmit={handleSubmit} 
             isMessageMode={false} 
-            onNewQuestion={handleNewQuestion} 
-            intent="Temperatura" // Ou a intent que você deseja passar
+            onNewQuestion={handleNewQuestion}
           />
 
         </div>

@@ -74,9 +74,7 @@ const ConsultationPage = () => {
           onNewQuestion={handleNewQuestion} 
           isMessageMode={true} 
           consultationId={consultationId} 
-          intent="Temperatura"
         />
-
         </div>
       </div>
     </div>
