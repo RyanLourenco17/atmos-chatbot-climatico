@@ -11,7 +11,7 @@ const TextareaQuestion = ({ onNewQuestion, onSubmit, isMessageMode, consultation
 
   const intentKeywords = {
     "Temperatura": ["temperatura", "clima", "calor"],
-    "PoluiçãoDoAr": ["poluição", "qualidade do ar"],
+    "PoluiçaoDoAr": ["poluição", "qualidade do ar"],
   };
   
   const identifyIntent = (question) => {
