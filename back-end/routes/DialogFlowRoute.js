@@ -26,7 +26,7 @@ const helper = new OpenWeatherMapHelper({
 
 // Função para extrair cidade dos parâmetros ou do texto
 function extrairCidade(queryResult) {
-  let cidade = queryResult.parameters['Cidade'];
+  let cidade = queryResult.parameters['cidade'];
   if (!cidade || cidade === '') {
     const queryText = queryResult.queryText;
     const match = queryText.match(/em\s+(\w+)/i);
