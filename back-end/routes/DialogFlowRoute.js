@@ -4,8 +4,19 @@ const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
-const poluicaoArIntent = require('../intents/poluicaoAr');
-const handleTemperaturaIntent = require('../intents/temperatura');
+
+// Intents
+const handleTemperaturaIntent = require('../intents/clima_Atual');
+const handleDadosTotalIntent = require('../intents/dados_Total')
+const poluicaoArIntent = require('../intents/poluicao_Dados');
+const handlePressaoAtmosfericaIntent = require('../intents/pressao_Atm');
+const handleChuvaIntent = require('../intents/temp_Chuva');
+const handleTempMaxIntent = require('../intents/temp_max');
+const handleTempMinIntent = require('../intents/temp_min');
+const handleNebulosidadeVisibilidadeIntent = require('../intents/temp_NeblVisb');
+const handleUmidadeIntent = require('../intents/temp_Umidade');
+const handleVentoIntent = require('../intents/temp_Vento');
+
 
 // Configuração do helper do OpenWeather
 const helper = new OpenWeatherMapHelper({
@@ -29,10 +40,26 @@ function extrairCidade(queryResult) {
 // Função para lidar com a intent com base no nome
 async function lidarComIntent(intentName, cidade, consulta, queryText) {
   switch (intentName) {
-    case "Temperatura":
+    case "clima_Atual":
       return await handleTemperaturaIntent(cidade, consulta, queryText);
-    case "PoluiçaoDoAr":
+    case "poluicao_Dados":
       return await poluicaoArIntent(cidade, consulta, queryText);
+    case "dados_Total":
+      return await handleDadosTotalIntent(cidade, consulta, queryText);
+    case "pressao_Atm":
+      return await handlePressaoAtmosfericaIntent(cidade, consulta, queryText);
+    case "temp_Chuva":
+      return await handleChuvaIntent(cidade, consulta, queryText);
+    case "temp_max":
+      return await handleTempMaxIntent(cidade, consulta, queryText);
+    case "temp_min":
+      return await handleTempMinIntent(cidade, consulta, queryText);
+    case "temp_NeblVisb":
+      return await handleNebulosidadeVisibilidadeIntent(cidade, consulta, queryText);
+    case "temp_Umidade":
+      return await handleUmidadeIntent(cidade, consulta, queryText);
+    case "temp_Vento":
+      return await handleVentoIntent(cidade, consulta, queryText);
     default:
       return { fulfillmentText: "Desculpe, não entendi sua solicitação." };
   }
@@ -59,7 +86,9 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
     await newConsultation.save();
 
     // Lidar com a intent dinamicamente
-    await lidarComIntent(intentName, cidade, newConsultation, res, req.body.queryResult.queryText);
+    const result = await lidarComIntent(intentName, cidade, newConsultation, req.body.queryResult.queryText);
+
+    res.json({ fulfillmentText: result.fulfillmentText });
 
   } catch (error) {
     console.error('Erro ao criar nova consulta:', error);
