@@ -73,7 +73,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
   const cidade = extrairCidade(req.body.queryResult);
 
-  if (!parameters || !parameters.Cidade) {
+  if (!parameters || !parameters.cidade) {
     return res.status(400).json({ error: "Cidade não fornecida." });
   }
 

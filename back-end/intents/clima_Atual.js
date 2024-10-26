@@ -15,7 +15,9 @@ async function handleTemperaturaIntent(cidade, consulta, queryText) {
         const currentWeather = await new Promise((resolve, reject) => {
             helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
                 if (err) {
-                    return reject("Erro ao obter dados climáticos.");
+                    return
+                    console.error("Erro ao buscar clima:", err);
+                    reject("Desculpe, não conseguimos encontrar a cidade ou obter os dados climáticos.");
                 }
                 resolve(currentWeather);
             });
@@ -32,7 +34,7 @@ async function handleTemperaturaIntent(cidade, consulta, queryText) {
         consulta.messages.push(newMessage._id);
         await consulta.save();
 
-        return { "fulfillmentText": resposta };
+        return { "fulfillmentText": resposta, consultationId: consultation._id  };
     } catch (error) {
         console.error("Erro ao buscar temperatura:", error);
         return { "fulfillmentText": "Erro ao obter os dados de temperatura." };
