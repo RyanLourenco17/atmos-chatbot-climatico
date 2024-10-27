@@ -16,8 +16,7 @@ const helper = new OpenWeatherMapHelper({
 // Função para enviar consulta ao Dialogflow
 const detectIntent = async (queryText, sessionId) => {
   const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-  const token = await getAccessToken();
-
+  const dialogflowToken = await getAccessToken();
   try {
     const response = await axios.post(
       `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
@@ -31,7 +30,7 @@ const detectIntent = async (queryText, sessionId) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${dialogflowToken}`,
         },
       }
     );
@@ -41,6 +40,7 @@ const detectIntent = async (queryText, sessionId) => {
     throw new Error('Erro ao detectar intent');
   }
 };
+
 
 // Função para extrair cidade dos parâmetros ou do texto
 function extrairCidade(queryResult) {
