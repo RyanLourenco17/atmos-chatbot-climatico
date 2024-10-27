@@ -5,54 +5,51 @@ const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
-const  getAccessToken  = require('../middlewares/TokenDoGoogle')
-
+const { GoogleAuth } = require('google-auth-library'); // Removendo a duplicação
 
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
   units: "metric",
 });
 
+// Função para obter o Access Token
+const getAccessToken = async () => {
+  const auth = new GoogleAuth({
+    scopes: 'https://www.googleapis.com/auth/cloud-platform',
+  });
+  const client = await auth.getClient();
+  const accessToken = await client.getAccessToken();
+  return accessToken;
+}
+
 // Função para enviar consulta ao Dialogflow
-const detectIntent = async (queryText, sessionId) => {
-  const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-  const dialogflowToken = await getAccessToken();
-  try {
-    const response = await axios.post(
-      `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
-      {
-        queryInput: {
-          text: {
-            text: queryText,
-            languageCode: 'pt-BR',
-          },
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${dialogflowToken}`,
-        },
+async function detectIntent(projectId, sessionId, query) {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      queryInput: {
+        text: {
+          text: query,
+          languageCode: 'pt-BR' // ou o código do idioma que você estiver usando
+        }
       }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao detectar intent:', error.response ? error.response.data : error);
-    throw new Error('Erro ao detectar intent');
-  }
-};
+    })
+  });
 
-
-// Função para extrair cidade dos parâmetros ou do texto
-function extrairCidade(queryResult) {
-  let cidade = queryResult.parameters?.cidade;
-  if (!cidade || cidade === '') {
-    const queryText = queryResult.queryText;
-    const match = queryText.match(/em\s+(\w+)/i);
-    if (match) {
-      cidade = match[1];
-    }
+  // Verifica se a resposta foi bem-sucedida
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Dialogflow Error: ${errorData.error.message}`);
   }
-  return cidade;
+
+  const data = await response.json();
+  return data;
 }
 
 // Rota para criar uma nova consulta
@@ -63,7 +60,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   const sessionId = `${userId}_${Date.now()}`;
 
   try {
-    const dialogflowResult = await detectIntent(queryText, sessionId);
+    const dialogflowResult = await detectIntent(process.env.DIALOGFLOW_PROJECT_ID, sessionId, queryText); // Certifique-se de que o projectId está correto
     const intentName = dialogflowResult.intent.displayName;
     const cidade = extrairCidade(dialogflowResult);
 
