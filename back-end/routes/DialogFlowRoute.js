@@ -12,31 +12,33 @@ const helper = new OpenWeatherMapHelper({
 });
 
 // Função para enviar consulta ao Dialogflow
-async function detectIntent(queryText, sessionId) {
-  const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-  const url = `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`;
+const detectIntent = async (queryText, sessionId) => {
+  const projectId = process.env.DIALOGFLOW_PROJECT_ID; // ID do projeto
+  const token = await getAccessToken(); // Certifique-se de implementar essa função
 
   try {
-    const response = await axios.post(url, {
-      queryInput: {
-        text: {
-          text: queryText,
-          languageCode: 'pt-BR',
-        }
+    const response = await axios.post(
+      `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+      {
+        queryInput: {
+          text: {
+            text: queryText,
+            languageCode: 'pt-BR',
+          },
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    }, {
-      headers: {
-        'Authorization': `Bearer ${process.env.DIALOGFLOW_API_KEY}`,
-        'Content-Type': 'application/json',
-      }
-    });
-
-    return response.data.queryResult;
+    );
+    return response.data;
   } catch (error) {
-    console.error("Erro ao detectar intent:", error);
-    throw new Error("Erro ao conectar ao Dialogflow.");
+    console.error('Erro ao detectar intent:', error.response ? error.response.data : error);
+    throw new Error('Erro ao detectar intent'); // Lançar um erro para tratamento posterior
   }
-}
+};
 
 // Função para extrair cidade dos parâmetros ou do texto
 function extrairCidade(queryResult) {
@@ -55,7 +57,9 @@ function extrairCidade(queryResult) {
 router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const queryText = req.body.queryText;
-  const sessionId = req.userId; // Usando ID do usuário como ID da sessão
+
+  // Criação do sessionId como userId + DateNow
+  const sessionId = `${userId}_${Date.now()}`;
 
   try {
     const dialogflowResult = await detectIntent(queryText, sessionId);
@@ -72,10 +76,15 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
     let fulfillmentText = '';
     switch (intentName) {
       case "clima_Atual":
-        fulfillmentText = `O clima atual em ${cidade} é...`;  // Conecte à API do OpenWeather se necessário.
+        // Supondo que você tenha os dados de temperatura e descrição
+        const temp = 25; // Exemplo de temperatura
+        const feels_like = 24; // Exemplo de sensação térmica
+        const descricao = "ensolarado"; // Exemplo de descrição
+        fulfillmentText = `O clima atual em ${cidade} é ${temp}°C (Sensação térmica: ${feels_like}°C) - Condições: ${descricao}`;  // Conecte à API do OpenWeather se necessário.
         break;
       case "poluicao_Dados":
-        fulfillmentText = `Os dados de poluição do ar em ${cidade} são...`;
+        const aqi = 50; // Exemplo de AQI
+        fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
         break;
       // Adicione os outros cases de intents aqui
       default:
@@ -95,7 +104,9 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   const userId = req.userId;
   const { id } = req.params;
   const queryText = req.body.queryText;
-  const sessionId = req.userId;
+
+  // Utiliza o userId para criar o sessionId
+  const sessionId = `${userId}_${Date.now()}`;
 
   try {
     const consultation = await Consultation.findOne({ _id: id, user: userId });
@@ -136,10 +147,6 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
-
-// Exportando a rota
-module.exports = router;
-
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
