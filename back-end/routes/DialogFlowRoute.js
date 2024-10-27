@@ -5,7 +5,7 @@ const OpenWeatherMapHelper = require("openweathermap-node");
 const Consultation = require('../models/Consultation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
-const { getAccessToken } = require('../middlewares/TokenDoGoogle')
+const  getAccessToken  = require('../middlewares/TokenDoGoogle')
 
 
 const helper = new OpenWeatherMapHelper({
@@ -15,8 +15,8 @@ const helper = new OpenWeatherMapHelper({
 
 // Função para enviar consulta ao Dialogflow
 const detectIntent = async (queryText, sessionId) => {
-  const projectId = process.env.DIALOGFLOW_PROJECT_ID; // ID do projeto
-  const token = await getAccessToken(); // Certifique-se de implementar essa função
+  const projectId = process.env.DIALOGFLOW_PROJECT_ID;
+  const token = await getAccessToken();
 
   try {
     const response = await axios.post(
@@ -38,7 +38,7 @@ const detectIntent = async (queryText, sessionId) => {
     return response.data;
   } catch (error) {
     console.error('Erro ao detectar intent:', error.response ? error.response.data : error);
-    throw new Error('Erro ao detectar intent'); // Lançar um erro para tratamento posterior
+    throw new Error('Erro ao detectar intent');
   }
 };
 
@@ -60,7 +60,6 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const queryText = req.body.queryText;
 
-  // Criação do sessionId como userId + DateNow
   const sessionId = `${userId}_${Date.now()}`;
 
   try {
@@ -74,23 +73,27 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
     });
     await newConsultation.save();
 
-    // Aqui chamamos a API do OpenWeather com base na intent identificada
     let fulfillmentText = '';
-    switch (intentName) {
-      case "clima_Atual":
-        // Supondo que você tenha os dados de temperatura e descrição
-        const temp = 25; // Exemplo de temperatura
-        const feels_like = 24; // Exemplo de sensação térmica
-        const descricao = "ensolarado"; // Exemplo de descrição
-        fulfillmentText = `O clima atual em ${cidade} é ${temp}°C (Sensação térmica: ${feels_like}°C) - Condições: ${descricao}`;  // Conecte à API do OpenWeather se necessário.
-        break;
-      case "poluicao_Dados":
-        const aqi = 50; // Exemplo de AQI
-        fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
-        break;
-      // Adicione os outros cases de intents aqui
-      default:
-        fulfillmentText = "Desculpe, não entendi sua solicitação.";
+
+    // Chama a API do OpenWeather apenas se a intent for relevante
+    if (intentName === "clima_Atual" || intentName === "poluicao_Dados") {
+      const currentWeather = await helper.getCurrentWeatherByCity(cidade);
+
+      switch (intentName) {
+        case "clima_Atual":
+          const { temp, feels_like, weather } = currentWeather.main;
+          const descricao = weather[0].description;
+          fulfillmentText = `O clima atual em ${cidade} é ${temp}°C (Sensação térmica: ${feels_like}°C) - Condições: ${descricao}`;
+          break;
+        case "poluicao_Dados":
+          const aqi = 50; // Exemplo de AQI
+          fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
+          break;
+        default:
+          fulfillmentText = "Desculpe, não entendi sua solicitação.";
+      }
+    } else {
+      fulfillmentText = "Desculpe, não entendi sua solicitação.";
     }
 
     res.json({ fulfillmentText });
@@ -101,13 +104,13 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   }
 });
 
+
 // Rota para adicionar uma nova mensagem em uma consulta existente
 router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   const userId = req.userId;
   const { id } = req.params;
   const queryText = req.body.queryText;
 
-  // Utiliza o userId para criar o sessionId
   const sessionId = `${userId}_${Date.now()}`;
 
   try {
@@ -121,16 +124,26 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     const cidade = extrairCidade(dialogflowResult);
 
     let fulfillmentText = '';
-    switch (intentName) {
-      case "clima_Atual":
-        fulfillmentText = `O clima atual em ${cidade} é...`;  // Conecte à API do OpenWeather se necessário.
-        break;
-      case "poluicao_Dados":
-        fulfillmentText = `Os dados de poluição do ar em ${cidade} são...`;
-        break;
-      // Adicione os outros cases de intents aqui
-      default:
-        fulfillmentText = "Desculpe, não entendi sua solicitação.";
+
+    // Chama a API do OpenWeather apenas se a intent for relevante
+    if (intentName === "clima_Atual" || intentName === "poluicao_Dados") {
+      const currentWeather = await helper.getCurrentWeatherByCity(cidade);
+
+      switch (intentName) {
+        case "clima_Atual":
+          const { temp, feels_like, weather } = currentWeather.main;
+          const descricao = weather[0].description;
+          fulfillmentText = `O clima atual em ${cidade} é ${temp}°C (Sensação térmica: ${feels_like}°C) - Condições: ${descricao}`;
+          break;
+        case "poluicao_Dados":
+          const aqi = 50; // Exemplo de AQI
+          fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
+          break;
+        default:
+          fulfillmentText = "Desculpe, não entendi sua solicitação.";
+      }
+    } else {
+      fulfillmentText = "Desculpe, não entendi sua solicitação.";
     }
 
     const newMessage = new Message({
@@ -149,6 +162,7 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
     res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
   }
 });
+
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
