@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const OpenWeatherMapHelper = require("openweathermap-node");
+const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
-const { GoogleAuth } = require('google-auth-library'); // Removendo a duplicação
+const { GoogleAuth } = require('google-auth-library');
 
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
@@ -15,41 +15,37 @@ const helper = new OpenWeatherMapHelper({
 // Função para obter o Access Token
 const getAccessToken = async () => {
   const auth = new GoogleAuth({
-    scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
   const client = await auth.getClient();
   const accessToken = await client.getAccessToken();
-  return accessToken;
+  return accessToken.token; // Retorne o token diretamente
 }
 
 // Função para enviar consulta ao Dialogflow
 async function detectIntent(projectId, sessionId, query) {
-  const accessToken = await getAccessToken();
+  const accessToken = await getAccessToken(); // Obtenha o token
 
-  const response = await fetch(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
-    method: 'POST',
+  const response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
+    queryInput: {
+      text: {
+        text: query,
+        languageCode: 'pt-BR'
+      }
+    }
+  }, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      queryInput: {
-        text: {
-          text: query,
-          languageCode: 'pt-BR' // ou o código do idioma que você estiver usando
-        }
-      }
-    })
+    }
   });
 
   // Verifica se a resposta foi bem-sucedida
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Dialogflow Error: ${errorData.error.message}`);
+  if (response.status !== 200) {
+    throw new Error(`Dialogflow Error: ${response.data.error.message}`);
   }
 
-  const data = await response.json();
-  return data;
+  return response.data; // Retorna os dados da resposta
 }
 
 // Rota para criar uma nova consulta
@@ -60,9 +56,9 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   const sessionId = `${userId}_${Date.now()}`;
 
   try {
-    const dialogflowResult = await detectIntent(process.env.DIALOGFLOW_PROJECT_ID, sessionId, queryText); // Certifique-se de que o projectId está correto
+    const dialogflowResult = await detectIntent(process.env.DIALOGFLOW_PROJECT_ID, sessionId, queryText);
     const intentName = dialogflowResult.intent.displayName;
-    const cidade = extrairCidade(dialogflowResult);
+    const cidade = extrairCidade(dialogflowResult); // Certifique-se de que esta função está definida
 
     const newConsultation = new Consultation({
       user: userId,
