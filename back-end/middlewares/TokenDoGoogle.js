@@ -12,3 +12,6 @@ const getAccessToken = async () => {
   const accessToken = jwtClient.credentials.access_token;
   return accessToken;
 };
+
+
+module.exports = getAccessToken;
