@@ -14,12 +14,14 @@ const helper = new OpenWeatherMapHelper({
 
 // Função para obter o Access Token
 const getAccessToken = async () => {
+  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
   const auth = new GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    credentials: credentials, // Aqui passamos as credenciais
   });
   const client = await auth.getClient();
   const accessToken = await client.getAccessToken();
-  return accessToken.token; // Retorne o token diretamente
+  return accessToken.token;
 }
 
 // Função para enviar consulta ao Dialogflow
