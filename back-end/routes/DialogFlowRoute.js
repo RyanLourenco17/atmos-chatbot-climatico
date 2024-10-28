@@ -14,17 +14,14 @@ const client = new SessionsClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
 
-const sessionPath = client.projectAgentSessionPath('seu-projeto-id', 'sua-sessao-id');
-
 console.log('DIALOGFLOW_PROJECT_ID:', process.env.DIALOGFLOW_PROJECT_ID);
 console.log('GOOGLE_APPLICATION_CREDENTIALS: ', process.env.GOOGLE_APPLICATION_CREDENTIALS);
-
-
 
 // Inicializando o helper do OpenWeatherMap
 const helper = new OpenWeatherMapHelper({
     APPID: process.env.OPENWEATHER_API_KEY,
     units: 'metric',
+    lang: "pt_br"
 });
 
 // Funções auxiliares para obter dados climáticos
@@ -71,7 +68,7 @@ async function detectIntent(sessionId, query) {
         queryInput: {
             text: {
                 text: query,
-                languageCode: languageCode, // Ajuste o código de idioma conforme necessário
+                languageCode: languageCode,
             },
         },
     };
@@ -83,7 +80,7 @@ async function detectIntent(sessionId, query) {
 // Rota para criar uma nova consulta
 router.post('/nova-consulta', async (req, res) => {
     const userId = req.userId;
-    const cidade = req.body.queryResult.parameters.cidade;
+    const cidade = req.body.queryResult.parameters['cidade'];
     const sessionId = `${userId}_${Date.now()}`;
     const queryText = req.body.queryResult.queryText;
 
