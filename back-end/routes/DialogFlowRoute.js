@@ -95,29 +95,34 @@ async function getAirPollution(lat, lon) {
     }
 }
 
+// Rota para detectar a intenção do Dialogflow
+router.post('/detect-intent', getAccessToken, async (req, res) => {
+  const userId = req.userId;
+  const sessionId = `${userId}_${Date.now()}`;
+  const projectId = process.env.DIALOGFLOW_PROJECT_ID;
+  const { query } = req.body;
+
+  try {
+      const dialogflowResponse = await detectIntent(projectId, sessionId, query);
+      res.json(dialogflowResponse);
+  } catch (error) {
+      console.error('Erro ao processar a consulta:', error);
+      res.status(500).json({ message: 'Erro ao processar a consulta' });
+  }
+});
+
+
 // Rota para criar uma nova consulta
 router.post('/nova-consulta', async (req, res) => {
     const userId = req.userId;
+    const intentName = req.body.queryResult.intent.displayName;
     const cidade = req.body.queryResult.parameters["Cidade", "cidade"];
     const sessionId = `${userId}_${Date.now()}`;
     const projectId = process.env.DIALOGFLOW_PROJECT_ID
 
 
     try{
-      const accessToken = await getAccessToken();
-
-      const dialogflowResponse = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
-        {
-            queryInput: req.body.queryInput
-        }, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            }
-      });
-
-      const intentName = dialogflowResponse.data.queryResult.intent.displayName;
-
+      const dialogflowResponse = await detectIntent(projectId, sessionId, "Sua pergunta aqui");
 
       switch (intentName) {
         case "clima_Atual":
@@ -205,7 +210,7 @@ router.post('/nova-consulta', async (req, res) => {
             });
             break;
         default:
-            res.json({ fulfillmentText: "Desculpe, não entendi a sua pergunta." });
+          res.json({ fulfillmentText: "Desculpe, não entendi a sua pergunta." });
       }
     } catch(error){
       console.log('Erro ao processar a consulta: ', error);
