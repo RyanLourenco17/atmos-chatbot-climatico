@@ -5,53 +5,17 @@ const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
 const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
+const { SessionsClient } = require('@google-cloud/dialogflow');
 
+// Inicializando o cliente do Dialogflow
+const projectId = process.env.DIALOGFLOW_PROJECT_ID;
+const sessionClient = new SessionsClient();
+
+// Inicializando o helper do OpenWeatherMap
 const helper = new OpenWeatherMapHelper({
-  APPID: process.env.OPENWEATHER_API_KEY,
-  units: 'metric',
+    APPID: process.env.OPENWEATHER_API_KEY,
+    units: 'metric',
 });
-
-const { GoogleAuth } = require('google-auth-library');
-
-// Função para obter o Access Token
-const getAccessToken = async () => {
-  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-  const auth = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    credentials: credentials,
-  });
-  const client = await auth.getClient();
-  const accessToken = await client.getAccessToken();
-  return accessToken.token;
-}
-
-async function detectIntent(projectId, sessionId, query) {
-  const accessToken = await getAccessToken();
-  console.log(accessToken);
-
-  const response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
-    queryInput: {
-      text: {
-        text: query,
-        languageCode: 'pt-BR'
-      }
-    }
-  }, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    }
-  });
-
-  // Verifica se a resposta foi bem-sucedida
-  if (response.status !== 200) {
-    throw new Error(`Dialogflow Error: ${response.data.error.message}`);
-  }
-
-  return response.data;
-}
-
-
 
 // Funções auxiliares para obter dados climáticos
 async function getCoordinates(cidade) {
@@ -80,14 +44,7 @@ async function getAirPollution(lat, lon) {
 
         return {
             aqi: data.list[0].main.aqi,
-            CO: data.list[0].components.co,
-            NO: data.list[0].components.no,
-            NO2: data.list[0].components.no2,
-            O3: data.list[0].components.o3,
-            SO2: data.list[0].components.so2,
-            pm2_5: data.list[0].components.pm2_5,
-            pm10: data.list[0].components.pm10,
-            nh3: data.list[0].components.nh3
+            components: data.list[0].components,
         };
     } catch (error) {
         console.error('Error:', error);
@@ -95,126 +52,128 @@ async function getAirPollution(lat, lon) {
     }
 }
 
-// Rota para detectar a intenção do Dialogflow
-router.post('/detect-intent', getAccessToken, async (req, res) => {
-  const userId = req.userId;
-  const sessionId = `${userId}_${Date.now()}`;
-  const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-  const { query } = req.body;
+// Função para detectar a intent do Dialogflow
+async function detectIntent(sessionId, query) {
+    const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
 
-  try {
-      const dialogflowResponse = await detectIntent(projectId, sessionId, query);
-      res.json(dialogflowResponse);
-  } catch (error) {
-      console.error('Erro ao processar a consulta:', error);
-      res.status(500).json({ message: 'Erro ao processar a consulta' });
-  }
-});
+    const request = {
+        session: sessionPath,
+        queryInput: {
+            text: {
+                text: query,
+                languageCode: 'pt-BR', // Ajuste o código de idioma conforme necessário
+            },
+        },
+    };
 
+    const responses = await sessionClient.detectIntent(request);
+    return responses[0].queryResult; // Retorna o resultado da intent
+}
 
 // Rota para criar uma nova consulta
 router.post('/nova-consulta', async (req, res) => {
     const userId = req.userId;
-    const intentName = req.body.queryResult.intent.displayName;
-    const cidade = req.body.queryResult.parameters["Cidade", "cidade"];
+    const cidade = req.body.queryResult.parameters.cidade;
     const sessionId = `${userId}_${Date.now()}`;
-    const projectId = process.env.DIALOGFLOW_PROJECT_ID
 
+    try {
+        const queryResult = await detectIntent(sessionId, req.body.queryResult.queryText);
+        const intentName = queryResult.intent.displayName;
 
-    try{
-      const dialogflowResponse = await detectIntent(projectId, sessionId, "Sua pergunta aqui");
-
-      switch (intentName) {
-        case "clima_Atual":
-            helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
-                if (err) {
-                    console.error('Erro ao obter dados climáticos:', err);
-                    res.json({
-                        fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento."
-                    });
-                } else if (!currentWeather || !currentWeather.main || !currentWeather.weather) {
-                    res.json({
-                        fulfillmentText: "Dados climáticos inválidos."
-                    });
-                } else {
-                    const { temp, feels_like } = currentWeather.main;
-                    const description = currentWeather.weather[0].description;
-                    res.json({
-                        fulfillmentText: `O clima atual em ${currentWeather.name} é:
-                                          Temperatura: ${parseInt(temp)}°C (Sensação térmica: ${parseInt(feels_like)}°C)
-                                          Condições: ${description}`
-                    });
-                }
-            });
-            break;
-
-        case "pressao_Atm":
-            helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    const pressNivelMar = currentWeather.main.sea_level;
-                    const pressNivelSolo = currentWeather.main.grnd_level;
-
-                    if (pressNivelMar > 1 || pressNivelSolo > 1) {
+        switch (intentName) {
+            case "clima_Atual":
+                helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
+                    if (err) {
+                        console.error('Erro ao obter dados climáticos:', err);
                         res.json({
-                            fulfillmentText: `Na cidade de ${currentWeather.name}:\nA pressão atmosférica ao nível do mar está em torno de ${pressNivelMar} hPa.\n\nA pressão atmosférica ao nível do solo está em torno de ${pressNivelSolo} hPa.`
+                            fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento."
+                        });
+                    } else if (!currentWeather || !currentWeather.main || !currentWeather.weather) {
+                        res.json({
+                            fulfillmentText: "Dados climáticos inválidos."
                         });
                     } else {
-                        res.json({ fulfillmentText: 'Não foi possível obter informação da pressão atmosférica para essa cidade no momento.' });
+                        const { temp, feels_like } = currentWeather.main;
+                        const description = currentWeather.weather[0].description;
+                        res.json({
+                            fulfillmentText: `O clima atual em ${currentWeather.name} é:
+                                              Temperatura: ${parseInt(temp)}°C (Sensação térmica: ${parseInt(feels_like)}°C)
+                                              Condições: ${description}`
+                        });
                     }
-                }
-            });
-            break;
+                });
+                break;
 
-        case "poluicao_Dados":
-            try {
-                const coordinates = await getCoordinates(cidade);
-                if (!coordinates) {
-                    res.json({ fulfillmentText: 'Erro ao obter coordenadas.' });
-                    return;
-                }
-                const pollutionData = await getAirPollution(coordinates.lat, coordinates.lon);
-                if (!pollutionData) {
-                    res.json({ fulfillmentText: 'Erro ao obter dados de Poluição' });
-                    return;
-                }
-                const aqi = pollutionData.aqi;
+            case "pressao_Atm":
+                helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        const pressNivelMar = currentWeather.main.sea_level;
+                        const pressNivelSolo = currentWeather.main.grnd_level;
 
-                res.json({ fulfillmentText: `O índice de poluição do ar em ${cidade} é ${aqi}.` });
-            } catch (error) {
-                console.error('Error:', error);
-                res.json({ fulfillmentText: "Desculpe, ocorreu um erro interno." });
-            }
-            break;
+                        if (pressNivelMar > 1 || pressNivelSolo > 1) {
+                            res.json({
+                                fulfillmentText: `Na cidade de ${currentWeather.name}:
+                                                  A pressão atmosférica ao nível do mar está em torno de ${pressNivelMar} hPa.
+                                                  A pressão atmosférica ao nível do solo está em torno de ${pressNivelSolo} hPa.`
+                            });
+                        } else {
+                            res.json({ fulfillmentText: 'Não foi possível obter informação da pressão atmosférica para essa cidade no momento.' });
+                        }
+                    }
+                });
+                break;
 
-        case "dados_Total":
-            helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
-                if (err) {
-                    console.log(err);
-                    res.json({
-                        fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento."
-                    });
-                } else if (!currentWeather || !currentWeather.main || !currentWeather.weather) {
-                    res.json({
-                        fulfillmentText: "Dados climáticos inválidos."
-                    });
-                } else {
-                    const { temp, temp_max, temp_min } = currentWeather.main;
-                    const descricao = currentWeather.weather[0].description;
-                    res.json({
-                        fulfillmentText: `O clima atual em ${currentWeather.name} é:
-                        Temperatura: ${parseInt(temp)}ºC, Máxima: ${parseInt(temp_max)}ºC, Mínima: ${parseInt(temp_min)}ºC, Condições: ${descricao}`
-                    });
+            case "poluicao_Dados":
+                try {
+                    const coordinates = await getCoordinates(cidade);
+                    if (!coordinates) {
+                        res.json({ fulfillmentText: 'Erro ao obter coordenadas.' });
+                        return;
+                    }
+                    const pollutionData = await getAirPollution(coordinates.lat, coordinates.lon);
+                    if (!pollutionData) {
+                        res.json({ fulfillmentText: 'Erro ao obter dados de Poluição' });
+                        return;
+                    }
+                    const aqi = pollutionData.aqi;
+
+                    res.json({ fulfillmentText: `O índice de poluição do ar em ${cidade} é ${aqi}.` });
+                } catch (error) {
+                    console.error('Error:', error);
+                    res.json({ fulfillmentText: "Desculpe, ocorreu um erro interno." });
                 }
-            });
-            break;
-        default:
-          res.json({ fulfillmentText: "Desculpe, não entendi a sua pergunta." });
-      }
-    } catch(error){
-      console.log('Erro ao processar a consulta: ', error);
-      res.status(500).json({message: 'Erro ao processar a consulta'})
+                break;
+
+            case "dados_Total":
+                helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
+                    if (err) {
+                        console.log(err);
+                        res.json({
+                            fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento."
+                        });
+                    } else if (!currentWeather || !currentWeather.main || !currentWeather.weather) {
+                        res.json({
+                            fulfillmentText: "Dados climáticos inválidos."
+                        });
+                    } else {
+                        const { temp, temp_max, temp_min } = currentWeather.main;
+                        const descricao = currentWeather.weather[0].description;
+                        res.json({
+                            fulfillmentText: `O clima atual em ${currentWeather.name} é:
+                                              Temperatura: ${parseInt(temp)}ºC, Máxima: ${parseInt(temp_max)}ºC, Mínima: ${parseInt(temp_min)}ºC, Condições: ${descricao}`
+                        });
+                    }
+                });
+                break;
+
+            default:
+                res.json({ fulfillmentText: "Desculpe, não entendi a sua pergunta." });
+        }
+    } catch (error) {
+        console.log('Erro ao processar a consulta: ', error);
+        res.status(500).json({ message: 'Erro ao processar a consulta' });
     }
 });
 
