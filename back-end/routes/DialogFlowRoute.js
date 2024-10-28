@@ -98,14 +98,15 @@ async function getAirPollution(lat, lon) {
 // Rota para criar uma nova consulta
 router.post('/nova-consulta', async (req, res) => {
     const userId = req.userId;
-    const intentName = req.body.queryResult.intent.displayName;
-    const cidade = req.body.queryResult.parameters["Cidade"];
+    const cidade = req.body.queryInput.text.text;
     const sessionId = `${userId}_${Date.now()}`;
     const projectId = process.env.DIALOGFLOW_PROJECT_ID
 
 
     try{
-      const dialogflowResponse = await detectIntent(projectId, sessionId, "Sua pergunta aqui");
+      const dialogflowResponse = await detectIntent(projectId, sessionId, cidade);
+
+      const intentName = dialogflowResponse.queryResult.intent.displayName;
 
       switch (intentName) {
         case "clima_Atual":
@@ -171,7 +172,7 @@ router.post('/nova-consulta', async (req, res) => {
             }
             break;
 
-        case "Dados.total":
+        case "dados_Total":
             helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
                 if (err) {
                     console.log(err);
@@ -191,6 +192,9 @@ router.post('/nova-consulta', async (req, res) => {
                     });
                 }
             });
+            break;
+        default:
+            res.json({ fulfillmentText: "Intent não reconhecida." });
             break;
       }
     } catch(error){
