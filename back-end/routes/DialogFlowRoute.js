@@ -17,8 +17,13 @@ const client = new SessionsClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
 
-console.log('DIALOGFLOW_PROJECT_ID:', projectId);
-console.log('GOOGLE_APPLICATION_CREDENTIALS: ', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
+const privateKey = process.env.DIALOGFLOW_PRIVATE_KEY?.replace(/\\n/g,'\n');
+
+
+// console.log('DIALOGFLOW_PROJECT_ID:', projectId);
+// console.log('GOOGLE_APPLICATION_CREDENTIALS: ', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+console.log('DIALOGFLOW_PRIVATE_KEY:', privateKey);
 
 
 const getAccessToken = async () => {
