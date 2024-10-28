@@ -11,6 +11,48 @@ const helper = new OpenWeatherMapHelper({
   units: 'metric',
 });
 
+const { GoogleAuth } = require('google-auth-library');
+
+// Função para obter o Access Token
+const getAccessToken = async () => {
+  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  const auth = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    credentials: credentials,
+  });
+  const client = await auth.getClient();
+  const accessToken = await client.getAccessToken();
+  return accessToken.token;
+}
+
+async function detectIntent(projectId, sessionId, query) {
+  const accessToken = await getAccessToken();
+  console.log(accessToken);
+
+  const response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
+    queryInput: {
+      text: {
+        text: query,
+        languageCode: 'pt-BR'
+      }
+    }
+  }, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    }
+  });
+
+  // Verifica se a resposta foi bem-sucedida
+  if (response.status !== 200) {
+    throw new Error(`Dialogflow Error: ${response.data.error.message}`);
+  }
+
+  return response.data;
+}
+
+
+
 // Funções auxiliares para obter dados climáticos
 async function getCoordinates(cidade) {
     const url = `http://api.openweathermap.org/geo/1.0/direct?q=${cidade}&limit=1&appid=${process.env.OPENWEATHER_API_KEY}`;
@@ -59,8 +101,13 @@ router.post('/nova-consulta', async (req, res) => {
     const intentName = req.body.queryResult.intent.displayName;
     const cidade = req.body.queryResult.parameters["Cidade"];
     const sessionId = `${userId}_${Date.now()}`;
+    const projectId = process.env.DIALOGFLOW_PROJECT_ID
 
-    switch (intentName) {
+
+    try{
+      const dialogflowResponse = await detectIntent(projectId, sessionId, "Sua pergunta aqui");
+
+      switch (intentName) {
         case "clima_Atual":
             helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
                 if (err) {
@@ -145,6 +192,10 @@ router.post('/nova-consulta', async (req, res) => {
                 }
             });
             break;
+      }
+    } catch(error){
+      console.log('Erro ao processar a consulta: ', error);
+      res.status(500).json({message: 'Erro ao processar a consulta'})
     }
 });
 
