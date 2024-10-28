@@ -17,10 +17,11 @@ const getAccessToken = async () => {
   const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
   const auth = new GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    credentials: credentials, // Aqui passamos as credenciais
+    credentials: credentials,
   });
   const client = await auth.getClient();
   const accessToken = await client.getAccessToken();
+  console.log("Access Token:", accessToken);
   return accessToken.token;
 }
 

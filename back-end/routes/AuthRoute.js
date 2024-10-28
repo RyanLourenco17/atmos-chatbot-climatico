@@ -4,16 +4,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Função para simular a obtenção de um accessToken do Google OAuth
-async function getGoogleAccessToken() {
-  // Em uma implementação real, você chamaria a API do Google para obter um accessToken válido.
-  // Aqui estamos simulando um token de acesso.
-  return "simulated_google_access_token";
-}
-
 // Cadastro do usuário
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
+
+  console.log(req.body);
 
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
@@ -28,6 +23,7 @@ router.post('/register', async (req, res) => {
   const salt = await bcrypt.genSalt(12);
   const passwordHash = await bcrypt.hash(password, salt);
 
+  // Instancia um novo usuário
   const user = new User({
     name: name,
     email: email,
@@ -36,8 +32,10 @@ router.post('/register', async (req, res) => {
 
   try {
     const secret = process.env.JWT_SECRET || "nossosecret";
+
     const newUser = await user.save();
-    const token = jwt.sign({ name: newUser.name, id: newUser._id }, secret);
+
+    const token = jwt.sign({name: newUser.name, id: newUser._id}, secret)
 
     res.status(201).json({ message: 'Você realizou o cadastro com sucesso!' });
   } catch (error) {
@@ -62,13 +60,8 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Senha inválida!' });
   }
 
-  // Gerar o token de autenticação JWT
-  const token = jwt.sign({ name: user.name, id: user._id }, secret);
-
-  // Obter o accessToken do Google (simulado para este exemplo)
-  const accessToken = await getGoogleAccessToken();
-
-  res.json({ message: 'Você está autenticado!', token, userId: user._id, accessToken });
+  const token = jwt.sign({ name: user.name, id: user._id, }, secret);
+  res.json({ message: 'Você está autenticado!', token, userId: user._id });
 });
 
 module.exports = router;
