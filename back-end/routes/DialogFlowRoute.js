@@ -3,12 +3,12 @@ const router = express.Router();
 const axios = require('axios');
 const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
-const Message = require("../models/Message");
+const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
 
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
-  units: "metric",
+  units: 'metric',
 });
 
 // Função para enviar consulta ao Dialogflow
@@ -19,14 +19,14 @@ async function detectIntent(projectId, sessionId, query) {
     queryInput: {
       text: {
         text: query,
-        languageCode: 'pt-BR'
-      }
-    }
+        languageCode: 'pt-BR',
+      },
+    },
   }, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
-    }
+    },
   });
 
   if (response.status !== 200) {
@@ -37,7 +37,7 @@ async function detectIntent(projectId, sessionId, query) {
 }
 
 // Rota para criar uma nova consulta
-router.post("/nova-consulta", verifyToken, async (req, res) => {
+router.post('/nova-consulta', async (req, res) => {
   const userId = req.userId;
   const queryText = req.body.queryText;
 
@@ -50,7 +50,6 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   try {
     const dialogflowResult = await detectIntent(process.env.DIALOGFLOW_PROJECT_ID, sessionId, queryText);
     const intentName = dialogflowResult.intent.displayName;
-
     const cidade = extrairCidade(dialogflowResult); // Função para extrair a cidade
 
     const newConsultation = new Consultation({ user: userId, messages: [] });
@@ -58,34 +57,32 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
     let fulfillmentText = '';
 
-    if (intentName === "clima_Atual" || intentName === "poluicao_Dados") {
+    if (intentName === 'clima_Atual' || intentName === 'poluicao_Dados') {
       const currentWeather = await helper.getCurrentWeatherByCity(cidade);
       switch (intentName) {
-        case "clima_Atual":
+        case 'clima_Atual':
           const { temp, feels_like, weather } = currentWeather.main;
           const descricao = weather[0].description;
           fulfillmentText = `O clima atual em ${cidade} é ${temp}°C (Sensação térmica: ${feels_like}°C) - Condições: ${descricao}`;
           break;
-        case "poluicao_Dados":
+        case 'poluicao_Dados':
           const aqi = 50; // Exemplo de AQI
           fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
           break;
       }
     } else {
-      fulfillmentText = "Desculpe, não entendi sua solicitação.";
+      fulfillmentText = 'Desculpe, não entendi sua solicitação.';
     }
 
     res.json({ fulfillmentText });
-
   } catch (error) {
     console.error('Erro ao criar nova consulta:', error);
-    res.status(500).json({ message: "Houve um erro ao criar a consulta." });
+    res.status(500).json({ message: 'Houve um erro ao criar a consulta.' });
   }
 });
 
-
 // Rota para adicionar uma nova mensagem em uma consulta existente
-router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
+router.post('/adicionar-mensagem/:id', async (req, res) => {
   const userId = req.userId;
   const { id } = req.params;
   const queryText = req.body.queryText;
@@ -95,53 +92,43 @@ router.post("/adicionar-mensagem/:id", verifyToken, async (req, res) => {
   try {
     const consultation = await Consultation.findOne({ _id: id, user: userId });
     if (!consultation) {
-      return res.status(404).json({ "fulfillmentText": "Consulta não encontrada ou não pertence ao usuário." });
+      return res.status(404).json({ fulfillmentText: 'Consulta não encontrada ou não pertence ao usuário.' });
     }
 
-    const dialogflowResult = await detectIntent(queryText, sessionId);
+    const dialogflowResult = await detectIntent(process.env.DIALOGFLOW_PROJECT_ID, sessionId, queryText);
     const intentName = dialogflowResult.intent.displayName;
     const cidade = extrairCidade(dialogflowResult);
 
     let fulfillmentText = '';
 
-    // Chama a API do OpenWeather apenas se a intent for relevante
-    if (intentName === "clima_Atual" || intentName === "poluicao_Dados") {
+    if (intentName === 'clima_Atual' || intentName === 'poluicao_Dados') {
       const currentWeather = await helper.getCurrentWeatherByCity(cidade);
-
       switch (intentName) {
-        case "clima_Atual":
+        case 'clima_Atual':
           const { temp, feels_like, weather } = currentWeather.main;
           const descricao = weather[0].description;
           fulfillmentText = `O clima atual em ${cidade} é ${temp}°C (Sensação térmica: ${feels_like}°C) - Condições: ${descricao}`;
           break;
-        case "poluicao_Dados":
+        case 'poluicao_Dados':
           const aqi = 50; // Exemplo de AQI
           fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
           break;
-        default:
-          fulfillmentText = "Desculpe, não entendi sua solicitação.";
       }
     } else {
-      fulfillmentText = "Desculpe, não entendi sua solicitação.";
+      fulfillmentText = 'Desculpe, não entendi sua solicitação.';
     }
 
-    const newMessage = new Message({
-      question: queryText,
-      answer: fulfillmentText
-    });
-
+    const newMessage = new Message({ question: queryText, answer: fulfillmentText });
     consultation.messages.push(newMessage._id);
     await newMessage.save();
     await consultation.save();
 
     res.json(newMessage);
-
   } catch (error) {
     console.error('Erro ao adicionar mensagem:', error);
-    res.status(500).json({ "fulfillmentText": "Erro ao adicionar mensagem." });
+    res.status(500).json({ fulfillmentText: 'Erro ao adicionar mensagem.' });
   }
 });
-
 
 // Rota para pegar todas as consultas climáticas do usuário
 router.get('/consultas', verifyToken, async (req, res) => {
@@ -170,8 +157,7 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id;
 
   try {
-    const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
-      .populate('messages');
+    const consultation = await Consultation.findOne({ _id: consultationId, user: userId }).populate('messages');
 
     if (!consultation) {
       return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });
@@ -190,14 +176,12 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id;
 
   try {
-    const consultation = await Consultation.findOne({ _id: consultationId, user: userId })
-      .populate('messages', 'question answer');
+    const consultation = await Consultation.findOne({ _id: consultationId, user: userId });
 
     if (!consultation) {
       return res.status(404).json({ message: 'Consulta não encontrada ou não pertence ao usuário.' });
     }
 
-    // Use deleteOne ou findByIdAndDelete para deletar
     await Consultation.deleteOne({ _id: consultationId, user: userId });
 
     res.json({ message: 'Consulta deletada com sucesso.' });
