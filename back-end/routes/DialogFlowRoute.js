@@ -14,7 +14,8 @@ const helper = new OpenWeatherMapHelper({
 
 // Função para enviar consulta ao Dialogflow
 async function detectIntent(projectId, sessionId, query) {
-  const accessToken = await getAccessToken(); // Presumindo que você tenha essa função definida
+  const accessToken = await getAccessToken();
+  console.log(`O Token de acesso é: ${accessToken}`) // Presumindo que você tenha essa função definida
 
   const response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
     queryInput: {
