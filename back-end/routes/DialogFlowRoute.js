@@ -98,15 +98,26 @@ async function getAirPollution(lat, lon) {
 // Rota para criar uma nova consulta
 router.post('/nova-consulta', async (req, res) => {
     const userId = req.userId;
-    const cidade = req.body.queryInput.text.text;
+    const cidade = req.body.queryResult.parameters["Cidade", "cidade"];
     const sessionId = `${userId}_${Date.now()}`;
     const projectId = process.env.DIALOGFLOW_PROJECT_ID
 
 
     try{
-      const dialogflowResponse = await detectIntent(projectId, sessionId, cidade);
+      const accessToken = await getAccessToken();
 
-      const intentName = dialogflowResponse.queryResult.intent.displayName;
+      const dialogflowResponse = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+        {
+            queryInput: req.body.queryInput
+        }, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            }
+      });
+
+      const intentName = dialogflowResponse.data.queryResult.intent.displayName;
+
 
       switch (intentName) {
         case "clima_Atual":
@@ -194,8 +205,7 @@ router.post('/nova-consulta', async (req, res) => {
             });
             break;
         default:
-            res.json({ fulfillmentText: "Intent não reconhecida." });
-            break;
+            res.json({ fulfillmentText: "Desculpe, não entendi a sua pergunta." });
       }
     } catch(error){
       console.log('Erro ao processar a consulta: ', error);
