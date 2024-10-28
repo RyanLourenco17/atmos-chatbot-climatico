@@ -5,17 +5,27 @@ const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
 const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
-const getAccessToken = require('../middlewares/TokenDoGoogle')
 
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
   units: 'metric',
 });
 
+const getAccessToken = async () => {
+  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  const auth = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    credentials: credentials,
+  });
+  const client = await auth.getClient();
+  const accessToken = await client.getAccessToken();
+  console.log("Access Token:", accessToken);
+  return accessToken.token;
+}
+
 // Função para enviar consulta ao Dialogflow
 async function detectIntent(projectId, sessionId, query) {
   const accessToken = await getAccessToken();
-  console.log(`O Token de acesso é: ${accessToken}`) // Presumindo que você tenha essa função definida
 
   const response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
     queryInput: {
