@@ -10,7 +10,7 @@ const checkToken = (req, res, next) => {
 
   try {
     const secret = process.env.JWT_SECRET || "nossosecret";
-    const verified = jwt.verify(token, secret);
+    const verified = jwt.verify(token, secret, { algorithms: ['HS256'] });
     req.userId = verified.id;
     next();
   } catch (err) {
