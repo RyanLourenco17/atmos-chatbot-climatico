@@ -10,7 +10,16 @@ const languageCode = 'pt-BR';
 
 // Inicializando o cliente do Dialogflow
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-const sessionClient = new SessionsClient();
+const client = new SessionsClient({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+});
+
+const sessionPath = client.projectAgentSessionPath('seu-projeto-id', 'sua-sessao-id');
+
+console.log('DIALOGFLOW_PROJECT_ID:', process.env.DIALOGFLOW_PROJECT_ID);
+console.log('GOOGLE_APPLICATION_CREDENTIALS: ', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
+
 
 // Inicializando o helper do OpenWeatherMap
 const helper = new OpenWeatherMapHelper({
@@ -55,7 +64,7 @@ async function getAirPollution(lat, lon) {
 
 // Função para detectar a intent do Dialogflow
 async function detectIntent(sessionId, query) {
-    const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
+    const sessionPath = client.projectAgentSessionPath(projectId, sessionId);
 
     const request = {
         session: sessionPath,
