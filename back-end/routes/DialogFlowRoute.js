@@ -5,6 +5,7 @@ const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
 const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
+const getAccessToken = require('../middlewares/TokenDoGoogle')
 
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
