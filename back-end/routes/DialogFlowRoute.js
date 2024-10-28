@@ -5,29 +5,15 @@ const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
 const Message = require("../models/Message");
 const verifyToken = require('../middlewares/VerificarToken');
-const { GoogleAuth } = require('google-auth-library');
 
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
   units: "metric",
 });
 
-// Função para obter o Access Token
-const getAccessToken = async () => {
-  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-  const auth = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    credentials: credentials,
-  });
-  const client = await auth.getClient();
-  const accessToken = await client.getAccessToken();
-  console.log("Access Token:", accessToken);
-  return accessToken.token;
-}
-
 // Função para enviar consulta ao Dialogflow
 async function detectIntent(projectId, sessionId, query) {
-  const accessToken = await getAccessToken(); // Obtenha o token
+  const accessToken = await getAccessToken(); // Presumindo que você tenha essa função definida
 
   const response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`, {
     queryInput: {
@@ -43,12 +29,11 @@ async function detectIntent(projectId, sessionId, query) {
     }
   });
 
-  // Verifica se a resposta foi bem-sucedida
   if (response.status !== 200) {
     throw new Error(`Dialogflow Error: ${response.data.error.message}`);
   }
 
-  return response.data; // Retorna os dados da resposta
+  return response.data;
 }
 
 // Rota para criar uma nova consulta
@@ -56,25 +41,25 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
   const userId = req.userId;
   const queryText = req.body.queryText;
 
+  if (!queryText) {
+    return res.status(400).json({ message: 'queryText é obrigatório.' });
+  }
+
   const sessionId = `${userId}_${Date.now()}`;
 
   try {
     const dialogflowResult = await detectIntent(process.env.DIALOGFLOW_PROJECT_ID, sessionId, queryText);
     const intentName = dialogflowResult.intent.displayName;
-    const cidade = extrairCidade(dialogflowResult); // Certifique-se de que esta função está definida
 
-    const newConsultation = new Consultation({
-      user: userId,
-      messages: []
-    });
+    const cidade = extrairCidade(dialogflowResult); // Função para extrair a cidade
+
+    const newConsultation = new Consultation({ user: userId, messages: [] });
     await newConsultation.save();
 
     let fulfillmentText = '';
 
-    // Chama a API do OpenWeather apenas se a intent for relevante
     if (intentName === "clima_Atual" || intentName === "poluicao_Dados") {
       const currentWeather = await helper.getCurrentWeatherByCity(cidade);
-
       switch (intentName) {
         case "clima_Atual":
           const { temp, feels_like, weather } = currentWeather.main;
@@ -85,8 +70,6 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
           const aqi = 50; // Exemplo de AQI
           fulfillmentText = `O índice de poluição do ar em ${cidade} é ${aqi}.`;
           break;
-        default:
-          fulfillmentText = "Desculpe, não entendi sua solicitação.";
       }
     } else {
       fulfillmentText = "Desculpe, não entendi sua solicitação.";
@@ -96,7 +79,7 @@ router.post("/nova-consulta", verifyToken, async (req, res) => {
 
   } catch (error) {
     console.error('Erro ao criar nova consulta:', error);
-    res.status(500).json({ "fulfillmentText": "Houve um erro ao criar a consulta." });
+    res.status(500).json({ message: "Houve um erro ao criar a consulta." });
   }
 });
 
