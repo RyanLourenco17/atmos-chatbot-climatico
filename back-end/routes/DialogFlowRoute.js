@@ -5,7 +5,8 @@ const OpenWeatherMapHelper = require('openweathermap-node');
 const Consultation = require('../models/Consultation');
 const Message = require('../models/Message');
 const verifyToken = require('../middlewares/VerificarToken');
-const { SessionsClient } = require('@google-cloud/dialogflow');
+const { SessionsClient, dialogflow } = require('@google-cloud/dialogflow');
+const languageCode = 'pt-BR';
 
 // Inicializando o cliente do Dialogflow
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
@@ -61,13 +62,13 @@ async function detectIntent(sessionId, query) {
         queryInput: {
             text: {
                 text: query,
-                languageCode: 'pt-BR', // Ajuste o código de idioma conforme necessário
+                languageCode: languageCode, // Ajuste o código de idioma conforme necessário
             },
         },
     };
 
     const responses = await sessionClient.detectIntent(request);
-    return responses[0].queryResult; // Retorna o resultado da intent
+    return responses[0].queryResult;
 }
 
 // Rota para criar uma nova consulta
@@ -75,9 +76,10 @@ router.post('/nova-consulta', async (req, res) => {
     const userId = req.userId;
     const cidade = req.body.queryResult.parameters.cidade;
     const sessionId = `${userId}_${Date.now()}`;
+    const queryText = req.body.queryResult.queryText;
 
     try {
-        const queryResult = await detectIntent(sessionId, req.body.queryResult.queryText);
+        const result = await detectIntent(queryText);
         const intentName = queryResult.intent.displayName;
 
         switch (intentName) {
