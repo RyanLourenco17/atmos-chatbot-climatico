@@ -42,6 +42,7 @@ const getAccessToken = async () => {
 getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err));
 
 // Rota para consultar Dialogflow
+// Rota para consultar Dialogflow
 router.post('/consultar-dialogflow', async (req, res) => {
   const { userId, question } = req.body;
 
@@ -83,13 +84,8 @@ router.post('/consultar-dialogflow', async (req, res) => {
     });
     await message.save();
 
-    // Buscando ou criando a consulta associada ao usuário
-    let consultation = await Consultation.findOne({ user: userId });
-    if (!consultation) {
-      consultation = new Consultation({ user: userId, messages: [message._id] });
-    } else {
-      consultation.messages.push(message._id);
-    }
+    // Criando uma nova consulta associada ao usuário
+    const consultation = new Consultation({ user: userId, messages: [message._id] });
     await consultation.save();
 
     // Respondendo ao front-end
@@ -99,6 +95,7 @@ router.post('/consultar-dialogflow', async (req, res) => {
     res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
   }
 });
+
 
 // Endpoint para funcionar como webhook do Dialogflow
 router.post('/webhook', async (req, res) => {
