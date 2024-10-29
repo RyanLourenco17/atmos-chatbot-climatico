@@ -1,4 +1,5 @@
 const { helper } = require('../routes/DialogFlowRoute');
+const OpenWeatherMapHelper = require('openweathermap-node');
 
 module.exports = async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];
