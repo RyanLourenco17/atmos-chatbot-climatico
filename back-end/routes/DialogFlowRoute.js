@@ -7,6 +7,10 @@ const { GoogleAuth } = require('google-auth-library');
 const dotenv = require('dotenv');
 dotenv.config();
 
+// Modelos de Dados
+const Message = require('../models/Message')
+const Consultation = require('../models/Consultation')
+
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 const client = new SessionsClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -63,6 +67,58 @@ async function getAirPollution(lat, lon) {
     return null;
   }
 }
+
+router.post('/consultar-dialogflow', async (req, res) => {
+  const { userId, question } = req.body;
+
+  try {
+    await getAccessToken();
+
+    const sessionId = `${userId}_${Date.now()}`;
+    const languageCode = 'pt-BR';
+
+    // Requisição para o Dialogflow
+    const response = await axios.post(
+      `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+      {
+        queryInput: {
+          text: {
+            text: question,
+            languageCode: languageCode
+          }
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+
+    // Obtendo a resposta do Dialogflow
+    const dialogflowAnswer = response.data.queryResult.fulfillmentText;
+
+    // Salvando as mensagens no banco de dados
+    const message = new Message({ question, answer: dialogflowAnswer });
+    await message.save();
+
+    // Salvando a consulta no banco
+    let consultation = await Consultation.findOne({ user: userId });
+    if (!consultation) {
+      consultation = new Consultation({ user: userId, messages: [message._id] });
+    } else {
+      consultation.messages.push(message._id);
+    }
+    await consultation.save();
+
+    // Respondendo ao front-end
+    res.json({ fulfillmentText: dialogflowAnswer });
+
+  } catch (error) {
+    console.error('Erro ao consultar o Dialogflow ou salvar no banco:', error);
+    res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
+  }
+});
 
 // Endpoint para funcionar como webhook do Dialogflow
 router.post('/nova-consulta', async (req, res) => {
