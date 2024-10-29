@@ -23,6 +23,7 @@ const getAccessToken = async () => {
   const client = await auth.getClient();
   const accessToken = await client.getAccessToken();
   return accessToken.token;
+  console.log(`TOKEN DE ACESSO: ${accessToken}`)
 };
 
 // Inicializando o helper do OpenWeatherMap
@@ -63,7 +64,7 @@ async function getAirPollution(lat, lon) {
 router.post('/nova-consulta', async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];
   const intentName = req.body.queryResult.intent.displayName;
-  console.log(`TOKEN DE ACESSO: ${accessToken}`)
+  console.log(getAccessToken)
 
   switch (intentName) {
     case "clima_Atual":
