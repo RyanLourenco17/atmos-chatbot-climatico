@@ -1,4 +1,4 @@
-const { helper } = require('../routes/DialogFlowRoute');
+const helper = require('../middlewares/helper');
 
 module.exports = async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];

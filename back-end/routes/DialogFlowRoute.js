@@ -6,6 +6,7 @@ const { SessionsClient } = require('@google-cloud/dialogflow');
 const { GoogleAuth } = require('google-auth-library');
 const dotenv = require('dotenv');
 dotenv.config();
+const helper = require('../middlewares/helper');
 
 // Intents
 const clima_Atual = require('../intents/clima_Atual')
@@ -21,15 +22,6 @@ const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 const client = new SessionsClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
-
-// Inicializando o helper do OpenWeatherMap
-const helper = new OpenWeatherMapHelper({
-  APPID: process.env.OPENWEATHER_API_KEY,
-  units: 'metric',
-  lang: 'pt_br',
-});
-
-module.exports = { helper };
 
 let accessToken = null;
 

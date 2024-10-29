@@ -1,4 +1,4 @@
-const { helper } = require('../routes/DialogFlowRoute');
+const helper = require('../middlewares/helper');
 
 // Funções auxiliares para dados de geolocalização e poluição
 async function getCoordinates(cidade) {
