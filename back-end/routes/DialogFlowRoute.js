@@ -97,10 +97,10 @@ router.post('/consultar-dialogflow', async (req, res) => {
     );
 
     // Obtendo a resposta do Dialogflow
-    // const dialogflowAnswer = response.data.queryResult.fulfillmentText;
+    const dialogflowAnswer = response.data.queryResult.fulfillmentText;
 
     // Salvando as mensagens no banco de dados
-    const message = new Message({ question, answer: response.data });
+    const message = new Message({ question, answer: dialogflowAnswer });
     await message.save();
 
     // Salvando a consulta no banco
@@ -113,7 +113,7 @@ router.post('/consultar-dialogflow', async (req, res) => {
     await consultation.save();
 
     // Respondendo ao front-end
-    res.json(response.data);
+    res.json({ fulfillmentText: dialogflowAnswer });
   } catch (error) {
     console.error('Erro ao consultar o Dialogflow ou salvar no banco:', error);
     res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
