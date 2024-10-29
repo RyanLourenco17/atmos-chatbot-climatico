@@ -7,11 +7,12 @@ const { GoogleAuth } = require('google-auth-library');
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Inicializando o cliente do Dialogflow
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 const client = new SessionsClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
+
+let accessToken = null;
 
 // Função para obter o token de acesso do Google
 const getAccessToken = async () => {
@@ -21,10 +22,13 @@ const getAccessToken = async () => {
     credentials: credentials,
   });
   const client = await auth.getClient();
-  const accessToken = await client.getAccessToken();
-  return accessToken.token;
-  console.log(`TOKEN DE ACESSO: ${accessToken}`)
+  const tokenResponse = await client.getAccessToken();
+  accessToken = tokenResponse.token; // Armazenando o token em uma variável de escopo mais amplo
+  console.log(`TOKEN DE ACESSO: ${accessToken}`);
 };
+
+// Obtendo o AccessToken ao carregar o módulo
+getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err));
 
 // Inicializando o helper do OpenWeatherMap
 const helper = new OpenWeatherMapHelper({
@@ -64,7 +68,7 @@ async function getAirPollution(lat, lon) {
 router.post('/nova-consulta', async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];
   const intentName = req.body.queryResult.intent.displayName;
-  console.log(getAccessToken)
+  console.log(`Usando TOKEN DE ACESSO: ${accessToken}`);
 
   switch (intentName) {
     case "clima_Atual":
@@ -142,6 +146,5 @@ router.post('/nova-consulta', async (req, res) => {
       break;
   }
 });
-
 
 module.exports = router;
