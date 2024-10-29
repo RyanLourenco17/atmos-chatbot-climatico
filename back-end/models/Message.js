@@ -8,6 +8,12 @@ const MessageSchema = new mongoose.Schema({
   answer: {
     type: String,
   },
+  parameters: {
+    type: mongoose.Schema.Types.Mixed,
+  },
+  intentName: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -15,4 +21,3 @@ const MessageSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Message', MessageSchema);
-

@@ -68,6 +68,7 @@ async function getAirPollution(lat, lon) {
   }
 }
 
+
 // Rota para consultar Dialogflow
 router.post('/consultar-dialogflow', async (req, res) => {
   const { userId, question } = req.body;
@@ -96,14 +97,21 @@ router.post('/consultar-dialogflow', async (req, res) => {
       }
     );
 
-    // Obtendo a resposta do Dialogflow
+    // Extraindo dados da resposta do Dialogflow
     const dialogflowAnswer = response.data.queryResult.fulfillmentText;
+    const parameters = response.data.queryResult.parameters || {};
+    const intentName = response.data.queryResult.intent.displayName || '';
 
-    // Salvando as mensagens no banco de dados
-    const message = new Message({ question, answer: dialogflowAnswer });
+    // Criando e salvando a mensagem no banco de dados
+    const message = new Message({
+      question,
+      answer: dialogflowAnswer,
+      parameters,
+      intentName,
+    });
     await message.save();
 
-    // Salvando a consulta no banco
+    // Buscando ou criando a consulta associada ao usuário
     let consultation = await Consultation.findOne({ user: userId });
     if (!consultation) {
       consultation = new Consultation({ user: userId, messages: [message._id] });
@@ -122,8 +130,9 @@ router.post('/consultar-dialogflow', async (req, res) => {
 
 
 
+
 // Endpoint para funcionar como webhook do Dialogflow
-router.post('/nova-consulta', async (req, res) => {
+router.post('/webhook', async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];
   const intentName = req.body.queryResult.intent.displayName;
   console.log(`Usando TOKEN DE ACESSO: ${accessToken}`);
