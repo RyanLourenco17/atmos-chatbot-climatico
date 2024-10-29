@@ -11,7 +11,6 @@ const ConsultationPage = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para buscar as mensagens da consulta
   const fetchMessages = async (id) => {
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${id}`, {
@@ -35,7 +34,6 @@ const ConsultationPage = () => {
     }
   };
 
-  // Efeito para carregar mensagens ao montar o componente
   useEffect(() => {
     if (consultationId) {
       fetchMessages(consultationId);
@@ -43,7 +41,6 @@ const ConsultationPage = () => {
   }, [consultationId]);
 
   const handleNewQuestion = (newQuestion) => {
-    // Adiciona a nova mensagem ao estado local
     const newMessage = { question: newQuestion, answer: 'Buscando resposta...' };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
@@ -70,11 +67,12 @@ const ConsultationPage = () => {
           </div>
         </div>
         <div className="interactive-area">
-        <TextareaQuestion 
-          onNewQuestion={handleNewQuestion} 
-          isMessageMode={true} 
-          consultationId={consultationId} 
-        />
+          <TextareaQuestion 
+            onNewQuestion={handleNewQuestion} 
+            isMessageMode={true} 
+            consultationId={consultationId} 
+            apiRoute="adicionar-mensagem" // Passando a rota correta
+          />
         </div>
       </div>
     </div>

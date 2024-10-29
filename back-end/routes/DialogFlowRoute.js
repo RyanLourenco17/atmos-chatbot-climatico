@@ -6,6 +6,9 @@ const { SessionsClient } = require('@google-cloud/dialogflow');
 const { GoogleAuth } = require('google-auth-library');
 const dotenv = require('dotenv');
 dotenv.config();
+
+// Middleware
+const verifyToken = require('../middlewares/VerificarToken');
 const helper = require('../middlewares/helper');
 
 // Intents
@@ -43,7 +46,7 @@ getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err)
 
 // Rota para consultar Dialogflow
 // Rota para consultar Dialogflow
-router.post('/consultar-dialogflow', async (req, res) => {
+router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
   const { userId, question } = req.body;
 
   try {
@@ -121,7 +124,7 @@ router.post('/webhook', async (req, res) => {
 });
 
 // Rota para adicionar mensagem a uma consulta que já existe
-router.post('/adicionar-mensagem/:id', async (req, res) => {
+router.post('/adicionar-mensagem/:id', verifyToken,  async (req, res) => {
   const { question } = req.body;
   const { id } = req.params;
 
@@ -182,7 +185,7 @@ router.post('/adicionar-mensagem/:id', async (req, res) => {
 });
 
 // Rota para pegar todas as consultas
-router.get('/consultas', async (req, res) => {
+router.get('/consultas', verifyToken, async (req, res) => {
   try {
     const consultations = await Consultation.find().populate('messages');
     res.json(consultations);
@@ -193,7 +196,7 @@ router.get('/consultas', async (req, res) => {
 });
 
 // Rota para pegar uma consulta específica
-router.get('/consultas/:id', async (req, res) => {
+router.get('/consultas/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -209,7 +212,7 @@ router.get('/consultas/:id', async (req, res) => {
 });
 
 // Rota para deletar uma consulta e suas mensagens associadas
-router.delete('/consultas/:id', async (req, res) => {
+router.delete('/consultas/:id', verifyToken,  async (req, res) => {
   const consultationId = req.params.id;
 
   try {

@@ -1,6 +1,6 @@
 .modal-content{
     background-color: var(--black-color);
-    color: var(--white-color);
+     color: var(--white-color); /* letras da configurção */
 }
 
 .update{
@@ -28,5 +28,5 @@
 }
 
 .btn-close {
-    background-color: var(--white-color);
+    background-color: white;
 }

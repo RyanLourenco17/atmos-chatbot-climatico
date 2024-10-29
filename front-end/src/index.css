@@ -11,11 +11,35 @@
   --black-color: #262626;
   --white-color: #FFF0FE;
   --neutral-color: #FFF0FE;
+  --mobile-backcolor:#232323;
+  --input-backcolor: rgb(70, 69, 69);
+  --sidebar-backcolor:#232323;
+  --backchat-color: linear-gradient(-45deg, #262626, #3f3f3f, #262626, #3f3f3f);
+  --weather-color: linear-gradient(135deg, #3b3a3a 50%, #574d5c 80%, transparent 100%, #FF8AFB 100%);
+  --textarea-color: #FFF0FE;
+  --placeholder-color: #808080;
 }
 
+.light_theme{
+  --primary-color: #692767;
+  --secondary-color: #6809C0;
+  --success-color: #86FE5C;
+  --error-color: #FF4646;
+  --warning-color: #FDD548;
+  --black-color: white;
+  --white-color: #212529;
+  --neutral-color: #FFF0FE;
+  --mobile-backcolor:#cfcdcd;
+  --input-backcolor: #cfcfcf;
+  --sidebar-backcolor:#f0eded;
+  --backchat-color: linear-gradient(-45deg, #e0e0e0, #f0f0f0, #e0e0e0, #f0f0f0);
+  --weather-color: linear-gradient(135deg, #d3d3d3 50%, #b5a0b0 80%, transparent 100%, #FF8AFB 100%);
+  --textarea-color: black;
+  --placeholder-color: #212529;
+}
 
 body{
-  background: linear-gradient(-45deg, #262626, #3f3f3f, #262626, #3f3f3f);
+  background: var(--backchat-color);
   background-size: 400% 400%;
   animation: backgroundTransition 10s ease-in-out infinite;
 }

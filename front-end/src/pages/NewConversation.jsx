@@ -8,15 +8,32 @@ import './NewConversation.css';
 const NewConversation = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = (consultaData) => {
-    navigate(`/consulta/${consultaData.consultationId}`);
-  };
-
   const handleNewQuestion = (newQuestion) => {
     const newMessage = {
       question: newQuestion,
       answer: 'Buscando resposta...'
     };
+    
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consulta-dialogflow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          userId: localStorage.getItem('userId'), 
+        }),
+      });
+
+      const data = await response.json();
+      navigate(`/consulta/${data.consultationId}`);
+    } catch (error) {
+      console.error('Erro ao criar nova consulta:', error);
+    }
   };
 
   return (
@@ -26,12 +43,12 @@ const NewConversation = () => {
         <div className="interactive-area">
           <Loading />
           <CardSugestion />
-          <TextareaQuestion 
-            onSubmit={handleSubmit} 
+          <TextareaQuestion
+            onSubmit={handleSubmit}
+            onNewQuestion={handleNewQuestion} 
             isMessageMode={false} 
-            onNewQuestion={handleNewQuestion}
+            apiRoute="consulta-dialogflow" // Passando a rota correta
           />
-
         </div>
       </div>
     </div>
