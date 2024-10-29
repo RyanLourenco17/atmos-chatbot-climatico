@@ -18,7 +18,7 @@ const NewConversation = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consulta-dialogflow', {
+      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultar-dialogflow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ const NewConversation = () => {
             onSubmit={handleSubmit}
             onNewQuestion={handleNewQuestion} 
             isMessageMode={false} 
-            apiRoute="consulta-dialogflow" // Passando a rota correta
+            apiRoute="consultar-dialogflow" // Passando a rota correta
           />
         </div>
       </div>
