@@ -1,4 +1,5 @@
 const helper = require('../middlewares/helper');
+const axios = require('axios');
 
 // Funções auxiliares para dados de geolocalização e poluição
 async function getCoordinates(cidade) {
