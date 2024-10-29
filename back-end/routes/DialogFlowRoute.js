@@ -46,7 +46,7 @@ getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err)
 
 // Rota para consultar Dialogflow
 // Rota para consultar Dialogflow
-router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
+router.post('/consultar-dialogflow',  async (req, res) => {
   const { userId, question } = req.body;
 
   try {
@@ -124,7 +124,7 @@ router.post('/webhook', async (req, res) => {
 });
 
 // Rota para adicionar mensagem a uma consulta que já existe
-router.post('/adicionar-mensagem/:id', verifyToken,  async (req, res) => {
+router.post('/adicionar-mensagem/:id', async (req, res) => {
   const { question } = req.body;
   const { id } = req.params;
 
