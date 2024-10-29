@@ -8,12 +8,12 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Modelos de Dados
-const Message = require('../models/Message')
-const Consultation = require('../models/Consultation')
+const Message = require('../models/Message');
+const Consultation = require('../models/Consultation');
 
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 const client = new SessionsClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 
 let accessToken = null;
@@ -38,7 +38,7 @@ getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err)
 const helper = new OpenWeatherMapHelper({
   APPID: process.env.OPENWEATHER_API_KEY,
   units: 'metric',
-  lang: "pt_br"
+  lang: 'pt_br',
 });
 
 // Funções auxiliares para dados de geolocalização e poluição
@@ -68,6 +68,7 @@ async function getAirPollution(lat, lon) {
   }
 }
 
+// Rota para consultar Dialogflow
 router.post('/consultar-dialogflow', async (req, res) => {
   const { userId, question } = req.body;
 
@@ -84,14 +85,14 @@ router.post('/consultar-dialogflow', async (req, res) => {
         queryInput: {
           text: {
             text: question,
-            languageCode: languageCode
-          }
-        }
+            languageCode: languageCode,
+          },
+        },
       },
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
     );
 
@@ -113,7 +114,6 @@ router.post('/consultar-dialogflow', async (req, res) => {
 
     // Respondendo ao front-end
     res.json({ fulfillmentText: dialogflowAnswer });
-
   } catch (error) {
     console.error('Erro ao consultar o Dialogflow ou salvar no banco:', error);
     res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
@@ -132,13 +132,13 @@ router.post('/nova-consulta', async (req, res) => {
         if (err) {
           console.error('Erro ao obter dados climáticos:', err);
           res.json({
-            fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento."
+            fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento.",
           });
         } else {
           const { temp, feels_like } = currentWeather.main;
           const description = currentWeather.weather[0].description;
           res.json({
-            fulfillmentText: `O clima atual em ${currentWeather.name} é: Temperatura: ${parseInt(temp)}°C (Sensação térmica: ${parseInt(feels_like)}°C), Condições: ${description}`
+            fulfillmentText: `O clima atual em ${currentWeather.name} é: Temperatura: ${parseInt(temp)}°C (Sensação térmica: ${parseInt(feels_like)}°C), Condições: ${description}`,
           });
         }
       });
@@ -155,7 +155,7 @@ router.post('/nova-consulta', async (req, res) => {
           res.json({
             fulfillmentText: pressNivelMar && pressNivelSolo
               ? `Na cidade de ${currentWeather.name}: Pressão ao nível do mar: ${pressNivelMar} hPa, Pressão ao nível do solo: ${pressNivelSolo} hPa`
-              : 'Não foi possível obter informação da pressão atmosférica para essa cidade no momento.'
+              : 'Não foi possível obter informação da pressão atmosférica para essa cidade no momento.',
           });
         }
       });
@@ -185,13 +185,13 @@ router.post('/nova-consulta', async (req, res) => {
         if (err) {
           console.log(err);
           res.json({
-            fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento."
+            fulfillmentText: "Desculpe, não foi possível encontrar as informações climáticas para essa cidade no momento.",
           });
         } else {
           const { temp, temp_max, temp_min } = currentWeather.main;
           const descricao = currentWeather.weather[0].description;
           res.json({
-            fulfillmentText: `O clima atual em ${currentWeather.name} é: Temperatura: ${parseInt(temp)}ºC com máxima de ${parseInt(temp_max)}ºC e mínima de ${parseInt(temp_min)}ºC. Condições: ${descricao}`
+            fulfillmentText: `O clima atual em ${currentWeather.name} é: Temperatura: ${parseInt(temp)}ºC com máxima de ${parseInt(temp_max)}ºC e mínima de ${parseInt(temp_min)}ºC. Condições: ${descricao}`,
           });
         }
       });
