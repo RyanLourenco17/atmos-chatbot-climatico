@@ -69,87 +69,58 @@ async function getAirPollution(lat, lon) {
 }
 
 // Rota para consultar Dialogflow
-// router.post('/consultar-dialogflow', async (req, res) => {
-//   const { userId, question } = req.body;
-
-//   try {
-//     await getAccessToken();
-
-//     const sessionId = `${userId}_${Date.now()}`;
-//     const languageCode = 'pt-BR';
-
-//     // Requisição para o Dialogflow
-//     const response = await axios.post(
-//       `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
-//       {
-//         queryInput: {
-//           text: {
-//             text: question,
-//             languageCode: languageCode,
-//           },
-//         },
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${accessToken}`,
-//         },
-//       }
-//     );
-
-//     // Obtendo a resposta do Dialogflow
-//     const dialogflowAnswer = response.data.queryResult.fulfillmentText;
-
-//     // Salvando as mensagens no banco de dados
-//     const message = new Message({ question, answer: dialogflowAnswer });
-//     await message.save();
-
-//     // Salvando a consulta no banco
-//     let consultation = await Consultation.findOne({ user: userId });
-//     if (!consultation) {
-//       consultation = new Consultation({ user: userId, messages: [message._id] });
-//     } else {
-//       consultation.messages.push(message._id);
-//     }
-//     await consultation.save();
-
-//     // Respondendo ao front-end
-//     res.json({ fulfillmentText: dialogflowAnswer });
-//   } catch (error) {
-//     console.error('Erro ao consultar o Dialogflow ou salvar no banco:', error);
-//     res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
-//   }
-// });
-
 router.post('/consultar-dialogflow', async (req, res) => {
   const { userId, question } = req.body;
 
   try {
-    const sessionId = `${userId}_${Date.now()}`;
-    const sessionPath = client.projectAgentSessionPath(projectId, sessionId);
+    await getAccessToken();
 
-    const request = {
-      session: sessionPath,
-      queryInput: {
-        text: {
-          text: question,
-          languageCode: 'pt-BR',
+    const sessionId = `${userId}_${Date.now()}`;
+    const languageCode = 'pt-BR';
+
+    // Requisição para o Dialogflow
+    const response = await axios.post(
+      `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+      {
+        queryInput: {
+          text: {
+            text: question,
+            languageCode: languageCode,
+          },
         },
       },
-    };
-
-    // Chama o método detectIntent
-    const [response] = await client.detectIntent(request);
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
     // Obtendo a resposta do Dialogflow
-    const dialogflowAnswer = response.queryResult.fulfillmentText;
+    // const dialogflowAnswer = response.data.queryResult.fulfillmentText;
+
+    // Salvando as mensagens no banco de dados
+    const message = new Message({ question, answer: response.data });
+    await message.save();
+
+    // Salvando a consulta no banco
+    let consultation = await Consultation.findOne({ user: userId });
+    if (!consultation) {
+      consultation = new Consultation({ user: userId, messages: [message._id] });
+    } else {
+      consultation.messages.push(message._id);
+    }
+    await consultation.save();
 
     // Respondendo ao front-end
-    res.json({ fulfillmentText: dialogflowAnswer });
+    res.json(response.data);
   } catch (error) {
-    console.error('Erro ao consultar o Dialogflow:', error);
+    console.error('Erro ao consultar o Dialogflow ou salvar no banco:', error);
     res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
   }
 });
+
+
 
 // Endpoint para funcionar como webhook do Dialogflow
 router.post('/nova-consulta', async (req, res) => {
@@ -169,7 +140,7 @@ router.post('/nova-consulta', async (req, res) => {
           const { temp, feels_like } = currentWeather.main;
           const description = currentWeather.weather[0].description;
           res.json({
-            fulfillmentText: `O clima atual em ${currentWeather.name} é: Temperatura: ${parseInt(temp)}°C (Sensação térmica: ${parseInt(feels_like)}°C), Condições: ${description}`,
+            fulfillmentText: `O clima atual em ${currentWeather.name} é de ${parseInt(temp)}°C (Sensação térmica: ${parseInt(feels_like)}°C), Condições: ${description}`,
           });
         }
       });
@@ -185,7 +156,7 @@ router.post('/nova-consulta', async (req, res) => {
           const pressNivelSolo = currentWeather.main.grnd_level;
           res.json({
             fulfillmentText: pressNivelMar && pressNivelSolo
-              ? `Na cidade de ${currentWeather.name}: Pressão ao nível do mar: ${pressNivelMar} hPa, Pressão ao nível do solo: ${pressNivelSolo} hPa`
+              ? `Na cidade de ${currentWeather.name}. A Pressão ao nível do mar é ${pressNivelMar} hPa, Pressão ao nível do solo: ${pressNivelSolo} hPa`
               : 'Não foi possível obter informação da pressão atmosférica para essa cidade no momento.',
           });
         }
