@@ -212,7 +212,7 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
 });
 
 // Rota para deletar uma consulta e suas mensagens associadas
-router.delete('/consultas/:id', verifyToken,  async (req, res) => {
+router.delete('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id;
 
   try {
@@ -229,9 +229,10 @@ router.delete('/consultas/:id', verifyToken,  async (req, res) => {
 
     res.status(200).json({ message: 'Consulta e mensagens deletadas com sucesso.' });
   } catch (error) {
-    console.error('Erro ao deletar consulta:', error);
+    console.error('Erro ao deletar consulta:', error); // Adicione este log para verificar o erro
     res.status(500).json({ error: 'Erro ao deletar consulta.' });
   }
 });
+
 
 module.exports = router;

@@ -77,9 +77,12 @@ const MenuSide = () => {
       });
   
       if (response.ok) {
-        console.log(`Consulta deletada: ${consultationId}`); // Verifique se o ID está 
-        await fetchConsultas();
-        setConsultas(prevConsultas => prevConsultas.filter(consulta => consulta._id !== consultationId));
+        console.log(`Consulta deletada: ${consultationId}`);
+        setConsultas(prevConsultas => {
+          const updatedConsultas = prevConsultas.filter(consulta => consulta._id !== consultationId);
+          console.log('Consultas após exclusão:', updatedConsultas); 
+          return updatedConsultas;
+        });
       } else {
         console.error('Erro ao deletar consulta:', response.status);
       }
@@ -87,6 +90,8 @@ const MenuSide = () => {
       console.error('Erro na requisição de deletar consulta:', error);
     }
   };
+  
+  
   
 
   const handleLogout = () => {
@@ -132,30 +137,31 @@ const MenuSide = () => {
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-                {isLoading ? (
-                  <div className="conversation-item">
-                    <p>Carregando consultas...</p>
-                  </div>
-                ) : (
-                  consultas && consultas.length > 0 ? (
-                    consultas.map((consulta, index) => (
-                      <div className="conversation-item" key={index}>
-                        <div onClick={() => handleNavigateToConversation(consulta._id)}>
-                          <p>Consulta {index + 1}: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
-                        </div>
-                        <Trash
-                          className="delete-icon"
-                          onClick={() => handleDeleteConsulta(consulta._id)}
-                        />
+              {isLoading ? (
+                <div className="conversation-item">
+                  <p>Carregando consultas...</p>
+                </div>
+              ) : (
+                consultas.length > 0 ? (
+                  consultas.map((consulta) => (
+                    <div className="conversation-item" key={consulta._id}>
+                      <div onClick={() => handleNavigateToConversation(consulta._id)}>
+                        <p>Consulta: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="conversation-item">
-                      <p>Nenhuma consulta disponível</p>
+                      <Trash
+                        className="delete-icon"
+                        onClick={() => handleDeleteConsulta(consulta._id)}
+                      />
                     </div>
-                  )
-                )}
-              </div>
+                  ))
+                ) : (
+                  <div className="conversation-item">
+                    <p>Nenhuma consulta disponível</p>
+                  </div>
+                )
+              )}
+            </div>
+            
             )}
           </div>
 

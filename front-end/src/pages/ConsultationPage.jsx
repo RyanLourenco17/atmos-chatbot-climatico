@@ -13,7 +13,7 @@ const ConsultationPage = () => {
 
   const fetchMessages = async (id) => {
     try {
-      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${id}`, {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${consultationId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -68,7 +68,7 @@ const ConsultationPage = () => {
             onNewQuestion={handleNewQuestion} 
             isMessageMode={true} 
             consultationId={consultationId} 
-            apiRoute="adicionar-mensagem"
+            apiRoute="adicionar-mensagem/${consultationId}"
           />
         </div>
       </div>
