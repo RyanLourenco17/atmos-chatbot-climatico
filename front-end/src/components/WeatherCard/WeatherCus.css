@@ -1,8 +1,8 @@
 .card {
     font-family: 'Oxygen';
     width: 240px;
-    background: linear-gradient(135deg, #3b3a3a 50%, #574d5c 80%, transparent 100%, #FF8AFB 100%);
-    color: #fff;
+    background: var(--weather-color);
+    color: var(--white-color);
     padding: 10px; /* Reduzindo o padding */
     text-align: center;
     border-radius: 20px;

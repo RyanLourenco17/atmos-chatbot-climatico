@@ -15,9 +15,8 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
     onNewQuestion(question); // Adiciona a nova pergunta à interface
 
     try {
-      // Requisição para consultar o Dialogflow ou adicionar mensagem
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/${apiRoute}`, {
-        method: isMessageMode ? 'POST' : 'POST', // Método POST para ambas as operações
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -25,7 +24,7 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
         body: JSON.stringify({
           userId: localStorage.getItem('userId'),
           question,
-          ...(isMessageMode ? { consultationId } : {}), // Adiciona consultationId se for adicionar mensagem
+          ...(isMessageMode ? { consultationId } : {}),
         }),
       });
 
@@ -33,11 +32,9 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
 
       if (response.ok) {
         console.log('Resposta do Dialogflow:', data.fulfillmentText);
-        // Aqui você pode adicionar lógica para exibir a resposta na interface
       } else {
         console.error('Erro ao consultar o Dialogflow:', data.error);
       }
-
     } catch (error) {
       console.error('Erro ao processar a solicitação:', error);
     } finally {
@@ -56,7 +53,7 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
         />
         <MicFill className="icon" />
       </div>
-      <button className="btn-send" type="submit">
+      <button className="btn-send" type="submit" disabled={!question.trim()}>
         <Send className="icon" />
       </button>
     </form>

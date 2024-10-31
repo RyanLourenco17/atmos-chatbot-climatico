@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../LoadingWave/Loading';
 
 import './Modal.css';
 
@@ -11,6 +12,7 @@ const ModalConfig = ({ show, handleClose }) => {
   const [password, setPassword] = useState('');
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,8 +21,8 @@ const ModalConfig = ({ show, handleClose }) => {
     setToken(storedToken);
     setUserId(storedUserId);
 
-    // Requisição GET para preencher o formulário
     const fetchUserData = async () => {
+      setIsLoading(true); 
       try {
         const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${storedUserId}`, {
           method: 'GET',
@@ -41,15 +43,24 @@ const ModalConfig = ({ show, handleClose }) => {
         }
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (show) {
       fetchUserData(); 
     }
-  }, [show, token]); // Adicionado `token` como dependência
+  }, [show, token]);
 
-  // Atualizar informações
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light_theme');
+    } else {
+      document.body.classList.remove('light_theme');
+    }
+  }, [theme]);
+
   const handleSave = async () => {
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${userId}`, {
@@ -69,7 +80,6 @@ const ModalConfig = ({ show, handleClose }) => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log('Dados atualizados com sucesso!');
         alert('Dados atualizados com sucesso!');
       } else {
         console.error(data.error);
@@ -81,7 +91,6 @@ const ModalConfig = ({ show, handleClose }) => {
     }
   };
 
-  // Deletar conta
   const handleDeleteAccount = async () => {
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${userId}`, {
@@ -111,48 +120,52 @@ const ModalConfig = ({ show, handleClose }) => {
         <Modal.Title>Configurações de Conta</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group controlId="formUsername">
-            <Form.Label>Nome de Usuário</Form.Label>
-            <Form.Control
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Atualize seu nome de usuário"
-            />
-          </Form.Group>
+        {isLoading ? (
+          <Loading /> // Exibe o componente de loading enquanto carrega
+        ) : (
+          <Form>
+            <Form.Group controlId="formUsername">
+              <Form.Label>Nome de Usuário</Form.Label>
+              <Form.Control
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Atualize seu nome de usuário"
+              />
+            </Form.Group>
 
-          <Form.Group controlId="formEmail" className="mt-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Atualize seu email"
-            />
-          </Form.Group>
+            <Form.Group controlId="formEmail" className="mt-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Atualize seu email"
+              />
+            </Form.Group>
 
-          <Form.Group controlId="formTheme" className="mt-3">
-            <Form.Label>Tema</Form.Label>
-            <Form.Select
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-            >
-              <option value="default">Padrão</option>
-              <option value="accessible">Acessível</option>
-            </Form.Select>
-          </Form.Group>
+            <Form.Group controlId="formTheme" className="mt-3">
+              <Form.Label>Tema</Form.Label>
+              <Form.Select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+              >
+                <option value="default">Padrão</option>
+                <option value="light">Claro</option>
+              </Form.Select>
+            </Form.Group>
 
-          <Form.Group controlId="formPassword" className="mt-3">
-            <Form.Label>Senha</Form.Label>
-            <Form.Control
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Atualize sua senha"
-            />
-          </Form.Group>
-        </Form>
+            <Form.Group controlId="formPassword" className="mt-3">
+              <Form.Label>Senha</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Atualize sua senha"
+              />
+            </Form.Group>
+          </Form>
+        )}
       </Modal.Body>
       <Modal.Footer>
         <Button className='btn delete' onClick={handleDeleteAccount}>
@@ -167,5 +180,3 @@ const ModalConfig = ({ show, handleClose }) => {
 };
 
 export default ModalConfig;
-
-

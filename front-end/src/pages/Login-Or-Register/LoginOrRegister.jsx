@@ -89,7 +89,7 @@ const LoginOrRegister = () => {
     e.preventDefault();
     
     const newErrors = {};
-  
+    
     const nameError = validateRequired(registerForm.name, 'Nome');
     const emailError = validateEmail(registerForm.email);
     const passwordError = validateRequired(registerForm.password, 'Senha');
@@ -99,9 +99,8 @@ const LoginOrRegister = () => {
   
     setErrors(newErrors);
   
-    
     if (Object.keys(newErrors).length === 0) {
-      setIsLoading(true); 
+      setIsLoading(true);
       
       try {
         const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/auth/register', {
@@ -120,8 +119,8 @@ const LoginOrRegister = () => {
   
         if (response.ok) {
           setMessage(data.message);
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('userId', data.userId);
+          localStorage.setItem('token', data.token);     // Armazena o token
+          localStorage.setItem('userId', data.userId);   // Armazena o userId
           navigate('/nova-consulta');
         } else {
           setMessage(data.error);

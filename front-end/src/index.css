@@ -18,6 +18,7 @@
   --weather-color: linear-gradient(135deg, #3b3a3a 50%, #574d5c 80%, transparent 100%, #FF8AFB 100%);
   --textarea-color: #FFF0FE;
   --placeholder-color: #808080;
+  --menuhover-color:  #FFF0FE;
 }
 
 .light_theme{
@@ -36,6 +37,7 @@
   --weather-color: linear-gradient(135deg, #d3d3d3 50%, #b5a0b0 80%, transparent 100%, #FF8AFB 100%);
   --textarea-color: black;
   --placeholder-color: #212529;
+  --menuhover-color: #504a4a;
 }
 
 body{

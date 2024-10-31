@@ -15,8 +15,8 @@ const UserSchema = new mongoose.Schema({
   },
   theme: {
     type: String,
-    enum: ['Padrão', 'Light'],
-    default: 'Padrão'
+    enum: ['default', 'light'],
+    default: 'default'
   },
   createdAt: {
     type: Date,

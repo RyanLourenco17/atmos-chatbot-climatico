@@ -4,11 +4,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+
 // Cadastro do usuário
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-
-  console.log(req.body);
 
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
@@ -23,7 +22,6 @@ router.post('/register', async (req, res) => {
   const salt = await bcrypt.genSalt(12);
   const passwordHash = await bcrypt.hash(password, salt);
 
-  // Instancia um novo usuário
   const user = new User({
     name: name,
     email: email,
@@ -34,14 +32,18 @@ router.post('/register', async (req, res) => {
     const secret = process.env.JWT_SECRET || "nossosecret";
 
     const newUser = await user.save();
+    const token = jwt.sign({ name: newUser.name, id: newUser._id }, secret);
 
-    const token = jwt.sign({name: newUser.name, id: newUser._id}, secret)
-
-    res.status(201).json({ message: 'Você realizou o cadastro com sucesso!' });
+    res.status(201).json({
+      message: 'Você realizou o cadastro com sucesso!',
+      token,                 // Inclui o token na resposta
+      userId: newUser._id    // Inclui o userId na resposta
+    });
   } catch (error) {
     res.status(400).json({ error });
   }
 });
+
 
 // Autenticação de Login
 router.post('/login', async (req, res) => {

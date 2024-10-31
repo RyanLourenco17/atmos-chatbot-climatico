@@ -1,7 +1,7 @@
 .sidebar {
     font-family: 'Rubik Mono One';
-    background-color: #232323;
-    color: var(--white-color);
+    background-color: var(--sidebar-backcolor); /* fundo da sidebar*/
+    color: var(--white-color); /* letras da sidebar*/
     height: 100vh;
     width: 100%;
     display: flex;
@@ -90,7 +90,7 @@
 
 
 .conversation-item:hover {
-    background-color: var(--white-color);
+    background-color: var( --menuhover-color);
     color: var(--black-color);
 }
 
@@ -120,7 +120,7 @@
 }
 
 .menu-item:hover, .menu-item .new-consultation:hover{
-    background-color: var(--white-color);
+    background-color: var( --menuhover-color); 
     color: var(--black-color);
 }
 
@@ -194,7 +194,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background-color: #232323;
+        background-color: var(--mobile-backcolor);
         padding: 10px;
         position: fixed;
         top: 0;
