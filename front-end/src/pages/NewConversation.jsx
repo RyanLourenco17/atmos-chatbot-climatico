@@ -8,14 +8,6 @@ import './NewConversation.css';
 const NewConversation = () => {
   const navigate = useNavigate();
 
-  const handleNewQuestion = (newQuestion) => {
-    const newMessage = {
-      question: newQuestion,
-      answer: 'Buscando resposta...'
-    };
-    
-  };
-
   const handleSubmit = async () => {
     try {
       const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultar-dialogflow', {
@@ -24,9 +16,7 @@ const NewConversation = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({
-          userId: localStorage.getItem('userId'), 
-        }),
+        body: JSON.stringify({ userId: localStorage.getItem('userId') }),
       });
 
       const data = await response.json();
@@ -44,10 +34,9 @@ const NewConversation = () => {
           <Loading />
           <CardSugestion />
           <TextareaQuestion
-            onSubmit={handleSubmit}
-            onNewQuestion={handleNewQuestion} 
+            onNewQuestion={handleSubmit}
             isMessageMode={false} 
-            apiRoute="consultar-dialogflow" // Passando a rota correta
+            apiRoute="consultar-dialogflow"
           />
         </div>
       </div>

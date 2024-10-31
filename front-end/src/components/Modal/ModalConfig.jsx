@@ -37,6 +37,11 @@ const ModalConfig = ({ show, handleClose }) => {
           setUsername(data.user.name);
           setEmail(data.user.email);
           setTheme(data.user.theme);
+          if (data.user.theme === 'light') {
+            document.body.classList.add('light_theme');
+          } else {
+            document.body.classList.remove('light_theme');
+          }
           setPassword('');
         } else {
           console.error(data.error);
@@ -53,13 +58,17 @@ const ModalConfig = ({ show, handleClose }) => {
     }
   }, [show, token]);
 
-  useEffect(() => {
-    if (theme === 'light') {
+  const handleThemeChange = (e) => {
+    const selectedTheme = e.target.value;
+    setTheme(selectedTheme);
+    localStorage.setItem('theme', selectedTheme);
+  
+    if (selectedTheme === 'light') {
       document.body.classList.add('light_theme');
     } else {
       document.body.classList.remove('light_theme');
     }
-  }, [theme]);
+  };
 
   const handleSave = async () => {
     try {
@@ -81,6 +90,11 @@ const ModalConfig = ({ show, handleClose }) => {
 
       if (response.ok) {
         alert('Dados atualizados com sucesso!');
+        if (theme === 'light') {
+          document.body.classList.add('light_theme');
+        } else {
+          document.body.classList.remove('light_theme');
+        }
       } else {
         console.error(data.error);
         alert('Erro ao atualizar dados.');
@@ -114,6 +128,8 @@ const ModalConfig = ({ show, handleClose }) => {
     }
   };
 
+
+
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -121,7 +137,7 @@ const ModalConfig = ({ show, handleClose }) => {
       </Modal.Header>
       <Modal.Body>
         {isLoading ? (
-          <Loading /> // Exibe o componente de loading enquanto carrega
+          <Loading /> 
         ) : (
           <Form>
             <Form.Group controlId="formUsername">
@@ -148,7 +164,7 @@ const ModalConfig = ({ show, handleClose }) => {
               <Form.Label>Tema</Form.Label>
               <Form.Select
                 value={theme}
-                onChange={(e) => setTheme(e.target.value)}
+                onChange={handleThemeChange}
               >
                 <option value="default">Padrão</option>
                 <option value="light">Claro</option>

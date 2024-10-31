@@ -21,15 +21,12 @@ const ConsultationPage = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar mensagens');
-      }
-
+      if (!response.ok) throw new Error('Erro ao buscar mensagens');
       const data = await response.json();
       setMessages(data.messages);
-      setIsLoading(false);
     } catch (error) {
       console.error('Erro ao buscar mensagens:', error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -71,7 +68,7 @@ const ConsultationPage = () => {
             onNewQuestion={handleNewQuestion} 
             isMessageMode={true} 
             consultationId={consultationId} 
-            apiRoute="adicionar-mensagem" // Passando a rota correta
+            apiRoute="adicionar-mensagem"
           />
         </div>
       </div>
