@@ -66,7 +66,7 @@ const MenuSide = () => {
   const handleDeleteConsulta = async (consultationId) => {
     const confirmed = window.confirm('Tem certeza que deseja deletar esta consulta?');
     if (!confirmed) return;
-
+  
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${consultationId}`, {
         method: 'DELETE',
@@ -75,8 +75,10 @@ const MenuSide = () => {
           'Content-Type': 'application/json',
         },
       });
-
+  
       if (response.ok) {
+        console.log(`Consulta deletada: ${consultationId}`); // Verifique se o ID está 
+        await fetchConsultas();
         setConsultas(prevConsultas => prevConsultas.filter(consulta => consulta._id !== consultationId));
       } else {
         console.error('Erro ao deletar consulta:', response.status);
@@ -85,6 +87,7 @@ const MenuSide = () => {
       console.error('Erro na requisição de deletar consulta:', error);
     }
   };
+  
 
   const handleLogout = () => {
     localStorage.removeItem('token');
