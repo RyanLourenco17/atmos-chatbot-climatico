@@ -46,13 +46,13 @@ getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err)
 
 // Rota para consultar Dialogflow
 // Rota para consultar Dialogflow
-router.post('/consultar-dialogflow',  async (req, res) => {
-  const { userId, question } = req.body;
+router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
+  const { question } = req.body;
 
   try {
     await getAccessToken();
 
-    const sessionId = `${userId}_${Date.now()}`;
+    const sessionId = `${req.userId}_${Date.now()}`;
     const languageCode = 'pt-BR';
 
     // Requisição para o Dialogflow
@@ -88,7 +88,7 @@ router.post('/consultar-dialogflow',  async (req, res) => {
     await message.save();
 
     // Criando uma nova consulta associada ao usuário
-    const consultation = new Consultation({ user: userId, messages: [message._id] });
+    const consultation = new Consultation({ user: req.userId, messages: [message._id] });
     await consultation.save();
 
     // Respondendo ao front-end
@@ -123,71 +123,10 @@ router.post('/webhook', async (req, res) => {
   }
 });
 
-// Rota para adicionar mensagem a uma consulta que já existe
-router.post('/adicionar-mensagem/:id', async (req, res) => {
-  const { question } = req.body;
-  const { id } = req.params;
-
-  try {
-    // Verificando se a consulta existe
-    const consultation = await Consultation.findById(id);
-    if (!consultation) {
-      return res.status(404).json({ error: 'Consulta não encontrada.' });
-    }
-
-    await getAccessToken();
-
-    const sessionId = `${consultation.user}_${Date.now()}`;
-    const languageCode = 'pt-BR';
-
-    // Requisição para o Dialogflow
-    const response = await axios.post(
-      `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
-      {
-        queryInput: {
-          text: {
-            text: question,
-            languageCode: languageCode,
-          },
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    // Extraindo dados da resposta do Dialogflow
-    const dialogflowAnswer = response.data.queryResult.fulfillmentText;
-    const parameters = response.data.queryResult.parameters || {};
-    const intentName = response.data.queryResult.intent.displayName || '';
-
-    // Criando e salvando a nova mensagem no banco de dados
-    const message = new Message({
-      question,
-      answer: dialogflowAnswer,
-      parameters,
-      intentName,
-    });
-    await message.save();
-
-    // Adicionando a nova mensagem à consulta existente
-    consultation.messages.push(message._id);
-    await consultation.save();
-
-    // Respondendo ao front-end
-    res.json({ fulfillmentText: dialogflowAnswer });
-  } catch (error) {
-    console.error('Erro ao adicionar mensagem:', error);
-    res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
-  }
-});
-
 // Rota para pegar todas as consultas
 router.get('/consultas', verifyToken, async (req, res) => {
   try {
-    const consultations = await Consultation.find().populate('messages');
+    const consultations = await Consultation.find({ user: req.userId }).populate('messages');
     res.json(consultations);
   } catch (error) {
     console.error('Erro ao buscar consultas:', error);
@@ -200,7 +139,7 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const consultation = await Consultation.findById(id).populate('messages');
+    const consultation = await Consultation.findOne({ _id: id, user: req.userId }).populate('messages');
     if (!consultation) {
       return res.status(404).json({ error: 'Consulta não encontrada.' });
     }
@@ -211,12 +150,13 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
   }
 });
 
+
 // Rota para deletar uma consulta e suas mensagens associadas
 router.delete('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id;
 
   try {
-    const consultation = await Consultation.findById(consultationId);
+    const consultation = await Consultation.findOne({ _id: consultationId, user: req.userId });
     if (!consultation) {
       return res.status(404).json({ error: 'Consulta não encontrada.' });
     }
@@ -229,7 +169,7 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
 
     res.status(200).json({ message: 'Consulta e mensagens deletadas com sucesso.' });
   } catch (error) {
-    console.error('Erro ao deletar consulta:', error); // Adicione este log para verificar o erro
+    console.error('Erro ao deletar consulta:', error);
     res.status(500).json({ error: 'Erro ao deletar consulta.' });
   }
 });

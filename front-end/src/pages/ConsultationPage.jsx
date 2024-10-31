@@ -68,7 +68,7 @@ const ConsultationPage = () => {
             onNewQuestion={handleNewQuestion} 
             isMessageMode={true} 
             consultationId={consultationId} 
-            apiRoute="adicionar-mensagem/${consultationId}"
+            apiRoute={`adicionar-mensagem/${consultationId}`} // Use crase aqui
           />
         </div>
       </div>
