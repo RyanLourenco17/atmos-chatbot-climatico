@@ -11,7 +11,7 @@ const ConsultationPage = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchMessages = async (id) => {
+  const fetchMessages = async (consultationId) => {
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${consultationId}`, {
         method: 'GET',

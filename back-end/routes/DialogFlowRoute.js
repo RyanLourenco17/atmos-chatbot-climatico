@@ -158,10 +158,11 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
     // Verificando se a consulta existe e pertence ao usuário autenticado
     const consultation = await Consultation.findOne({ _id: consultationId, user: req.userId });
     if (!consultation) {
+      console.error(`Consulta com ID ${consultationId} não encontrada ou não pertence ao usuário.`);
       return res.status(404).json({ error: 'Consulta não encontrada.' });
     }
 
-    // Deletando apenas a consulta
+    // Deletando a consulta
     await consultation.remove();
     res.status(200).json({ message: 'Consulta deletada com sucesso.' });
   } catch (error) {
@@ -169,5 +170,6 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Erro ao deletar consulta.' });
   }
 });
+
 
 module.exports = router;
