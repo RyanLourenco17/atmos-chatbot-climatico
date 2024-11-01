@@ -163,7 +163,7 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
     }
 
     // Deletando a consulta
-    await consultation.remove();
+    await Consultation.deleteOne({ _id: consultationId });
     res.status(200).json({ message: 'Consulta deletada com sucesso.' });
   } catch (error) {
     console.error('Erro ao deletar consulta:', error);
