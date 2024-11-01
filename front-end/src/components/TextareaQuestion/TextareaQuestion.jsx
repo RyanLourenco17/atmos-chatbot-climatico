@@ -38,7 +38,7 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
     } catch (error) {
       console.error('Erro ao processar a solicitação:', error);
     } finally {
-      setQuestion(''); // Limpa o campo de input
+      setQuestion(''); 
     }
   };
 

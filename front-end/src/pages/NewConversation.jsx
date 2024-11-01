@@ -18,13 +18,14 @@ const NewConversation = () => {
         },
         body: JSON.stringify({ userId: localStorage.getItem('userId') }),
       });
-
+  
       const data = await response.json();
       navigate(`/consulta/${data.consultationId}`);
     } catch (error) {
       console.error('Erro ao criar nova consulta:', error);
     }
   };
+  
 
   return (
     <div className="page-container">
