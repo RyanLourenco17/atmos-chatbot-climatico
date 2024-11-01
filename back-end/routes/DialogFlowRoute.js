@@ -91,8 +91,8 @@ router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
     const consultation = new Consultation({ user: req.userId, messages: [message._id] });
     await consultation.save();
 
-    // Respondendo ao front-end
-    res.json({ fulfillmentText: dialogflowAnswer });
+  //  Retornando a resposta e o id da consulta para o usuário
+    res.json({ fulfillmentText: dialogflowAnswer, consultationId: consultation._id });
   } catch (error) {
     console.error('Erro ao consultar o Dialogflow ou salvar no banco:', error);
     res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
