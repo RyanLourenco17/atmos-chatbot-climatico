@@ -77,7 +77,7 @@ const MenuSide = () => {
       });
   
       if (response.ok) {
-        // Removendo a consulta do estado local após deletar
+        // Atualiza o estado para remover a consulta deletada
         setConsultas((prevConsultas) => prevConsultas.filter(consulta => consulta._id !== consultationId));
         alert('Consulta deletada com sucesso.');
       } else {
@@ -89,9 +89,6 @@ const MenuSide = () => {
   };
   
   
-  
-  
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
@@ -163,6 +160,7 @@ const MenuSide = () => {
               </div>
             )}
           </div>
+
 
           <div className="menu-section">
             {!isCollapsed && <WeatherCard />}
