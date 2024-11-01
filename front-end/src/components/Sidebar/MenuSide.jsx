@@ -66,7 +66,7 @@ const MenuSide = () => {
   const handleDeleteConsulta = async (consultationId) => {
     const confirmed = window.confirm('Tem certeza que deseja deletar esta consulta?');
     if (!confirmed) return;
-  
+    
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${consultationId}`, {
         method: 'DELETE',
@@ -77,19 +77,17 @@ const MenuSide = () => {
       });
   
       if (response.ok) {
-        console.log(`Consulta deletada: ${consultationId}`);
-        setConsultas(prevConsultas => {
-          const updatedConsultas = prevConsultas.filter(consulta => consulta._id !== consultationId);
-          console.log('Consultas após exclusão:', updatedConsultas); 
-          return updatedConsultas;
-        });
+        // Removendo a consulta do estado local após deletar
+        setConsultas((prevConsultas) => prevConsultas.filter(consulta => consulta._id !== consultationId));
+        alert('Consulta deletada com sucesso.');
       } else {
         console.error('Erro ao deletar consulta:', response.status);
       }
     } catch (error) {
-      console.error('Erro na requisição de deletar consulta:', error);
+      console.error('Erro na requisição de deleção:', error);
     }
   };
+  
   
   
   
@@ -137,31 +135,32 @@ const MenuSide = () => {
             </div>
             {!isCollapsed && (
               <div className="conversation-list scrollable-section">
-              {isLoading ? (
-                <div className="conversation-item">
-                  <p>Carregando consultas...</p>
-                </div>
-              ) : (
-                consultas.length > 0 ? (
-                  consultas.map((consulta) => (
-                    <div className="conversation-item" key={consulta._id}>
-                      <div onClick={() => handleNavigateToConversation(consulta._id)}>
-                        <p>Consulta: {consulta.messages.length > 0 ? consulta.messages[0].question : 'Sem pergunta disponível'}</p>
-                      </div>
-                      <Trash
-                        className="delete-icon"
-                        onClick={() => handleDeleteConsulta(consulta._id)}
-                      />
-                    </div>
-                  ))
-                ) : (
+                {isLoading ? (
                   <div className="conversation-item">
-                    <p>Nenhuma consulta disponível</p>
+                    <p>Carregando consultas...</p>
                   </div>
-                )
-              )}
-            </div>
-            
+                ) : (
+                  consultas.length > 0 ? (
+                    consultas.map((consulta) => (
+                      <div key={consulta._id} className="conversation-item">
+                        <p onClick={() => handleNavigateToConversation(consulta._id)}>
+                          {consulta.messages && consulta.messages.length > 0 ? consulta.messages[0].question : 'Consulta sem título'}
+                        </p>
+
+                        <Trash
+                          className="delete-icon"
+                          onClick={() => handleDeleteConsulta(consulta._id)}
+                          aria-label="Deletar consulta"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="conversation-item">
+                      <p>Nenhuma consulta disponível</p>
+                    </div>
+                  )
+                )}
+              </div>
             )}
           </div>
 

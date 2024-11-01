@@ -154,7 +154,6 @@ router.get('/consultas/:id', verifyToken, async (req, res) => {
 // Rota para deletar uma consulta e suas mensagens associadas
 router.delete('/consultas/:id', verifyToken, async (req, res) => {
   const consultationId = req.params.id;
-
   try {
     const consultation = await Consultation.findOne({ _id: consultationId, user: req.userId });
     if (!consultation) {
@@ -166,13 +165,13 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
 
     // Deletando a consulta
     await consultation.remove();
-
     res.status(200).json({ message: 'Consulta e mensagens deletadas com sucesso.' });
   } catch (error) {
     console.error('Erro ao deletar consulta:', error);
     res.status(500).json({ error: 'Erro ao deletar consulta.' });
   }
 });
+
 
 
 module.exports = router;
