@@ -25,7 +25,7 @@ const NewConversation = () => {
           <Loading />
           <CardSugestion />
           <TextareaQuestion
-            onNewQuestion={handleSubmit} // Passa a função handleSubmit
+            onNewQuestion={handleSubmit}
             isMessageMode={false}
             apiRoute="consultar-dialogflow"
           />

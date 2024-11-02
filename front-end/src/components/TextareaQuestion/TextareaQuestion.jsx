@@ -30,7 +30,7 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
 
       if (response.ok && data.consultationId) {
         console.log('Id da consulta:', data.consultationId);
-        onNewQuestion(data.consultationId); // Passa consultationId para a navegação
+        onNewQuestion(data.consultationId);
       } else {
         console.error('Erro ao consultar o Dialogflow:', data.error);
       }

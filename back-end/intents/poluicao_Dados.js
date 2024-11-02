@@ -28,23 +28,45 @@ async function getAirPollution(lat, lon) {
   }
 }
 
+// Mapeamento do AQI para uma descrição mais amigável
+const aqiDescriptions = {
+  1: "Bom (0-50): A qualidade do ar é considerada satisfatória, e a poluição do ar representa pouco ou nenhum risco.",
+  2: "Moderado (51-100): A qualidade do ar é aceitável; no entanto, para alguns poluentes, pode haver uma preocupação leve para algumas pessoas.",
+  3: "Insatisfatório (101-150): A qualidade do ar é insatisfatória, e pode haver efeitos adversos para a saúde em algumas pessoas, especialmente aquelas mais sensíveis à poluição do ar.",
+  4: "Ruim (151-200): A qualidade do ar é ruim, e todos podem começar a sentir os efeitos da poluição. A saúde dos grupos sensíveis pode ser afetada.",
+  5: "Muito Ruim (201-300): A qualidade do ar é muito ruim, e pode haver efeitos mais sérios na saúde para todos.",
+  6: "Perigoso (301-500): A qualidade do ar é considerada perigosa, e toda a população pode ser afetada.",
+};
+
 module.exports = async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];
 
   try {
     const coordinates = await getCoordinates(cidade);
     if (!coordinates) {
-      res.json({ fulfillmentText: 'Erro ao obter coordenadas.' });
+      res.json({ fulfillmentText: 'Desculpe, não consegui obter as coordenadas da cidade.' });
       return;
     }
     const pollutionData = await getAirPollution(coordinates.lat, coordinates.lon);
     if (!pollutionData) {
-      res.json({ fulfillmentText: 'Erro ao obter dados de Poluição' });
+      res.json({ fulfillmentText: 'Desculpe, não consegui obter dados sobre a poluição do ar.' });
       return;
     }
-    res.json({ fulfillmentText: `O índice de poluição do ar em ${cidade} é ${pollutionData.aqi}.` });
+
+    // Obtendo a descrição do AQI
+    const aqiDescription = aqiDescriptions[pollutionData.aqi] || 'Dados de qualidade do ar não disponíveis.';
+
+    // Montando a resposta
+    const components = pollutionData.components;
+    const componentDetails = Object.entries(components)
+      .map(([key, value]) => `${key}: ${value.toFixed(2)} µg/m³`)
+      .join(', ');
+
+    res.json({
+      fulfillmentText: `O índice de qualidade do ar (AQI) em ${cidade} é ${pollutionData.aqi} (${aqiDescription}). Os principais componentes da poluição do ar incluem: ${componentDetails}.`
+    });
   } catch (error) {
     console.error('Erro:', error);
-    res.json({ fulfillmentText: "Desculpe, ocorreu um erro interno." });
+    res.json({ fulfillmentText: "Desculpe, ocorreu um erro interno ao processar sua solicitação." });
   }
 };

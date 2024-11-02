@@ -224,8 +224,10 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Consulta não encontrada.' });
     }
 
-    // Deleta as mensagens associadas à consulta
-    await Message.deleteMany({ consultation: consultationId });
+    // Deleta as mensagens associadas à consulta, caso existam
+    if (consultation.messages.length > 0) {
+      await Message.deleteMany({ _id: { $in: consultation.messages } });
+    }
 
     // Deleta a consulta
     await Consultation.deleteOne({ _id: consultationId });
@@ -236,6 +238,7 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Erro ao deletar consulta e mensagens associadas.' });
   }
 });
+
 
 module.exports = router;
 

@@ -10,6 +10,7 @@ const ConsultationPage = () => {
   const { consultationId } = useParams();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isQuestionLoading, setIsQuestionLoading] = useState(false); // Novo estado para a pergunta
 
   // Função para buscar mensagens da consulta ao carregar a página
   const fetchMessages = async (consultationId) => {
@@ -42,7 +43,8 @@ const ConsultationPage = () => {
     // Adiciona a pergunta na interface enquanto aguarda a resposta
     const newMessage = { question, answer: 'Buscando resposta...' };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
-
+    setIsQuestionLoading(true);
+  
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/adicionar-mensagem/${consultationId}`, {
         method: 'POST',
@@ -55,24 +57,24 @@ const ConsultationPage = () => {
           question,
         }),
       });
-
+  
       const data = await response.json();
       if (response.ok) {
-        // Atualiza a resposta da mensagem com o texto retornado pela API
-        setMessages((prevMessages) =>
-          prevMessages.map((msg, index) =>
-            index === prevMessages.length - 1
-              ? { ...msg, answer: data.fulfillmentText }
-              : msg
-          )
-        );
+        
+        setMessages((prevMessages) => [
+          ...prevMessages.slice(0, prevMessages.length - 1),
+          { question, answer: data.fulfillmentText }
+        ]);
       } else {
         console.error('Erro ao adicionar mensagem:', data.error);
       }
     } catch (error) {
       console.error('Erro ao processar a solicitação:', error);
+    } finally {
+      setIsQuestionLoading(false); // Desativa o loading da pergunta
     }
   };
+  
 
   return (
     <div className="page-container">
@@ -93,6 +95,7 @@ const ConsultationPage = () => {
                 </div>
               ))
             )}
+            {isQuestionLoading && <Loading />} {/* Exibe loading enquanto espera a resposta */}
           </div>
         </div>
         <div className="interactive-area">
@@ -100,7 +103,7 @@ const ConsultationPage = () => {
             onNewQuestion={handleNewQuestion} 
             isMessageMode={true} 
             consultationId={consultationId} 
-            apiRoute={`adicionar-mensagem/${consultationId}`}
+            apiRoute={`adicionar-mensagem/${consultationId}`} 
           />
         </div>
       </div>
