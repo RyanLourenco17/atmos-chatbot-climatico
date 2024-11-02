@@ -10,10 +10,24 @@ module.exports = async (req, res) => {
     } else {
       const pressNivelMar = currentWeather.main.sea_level;
       const pressNivelSolo = currentWeather.main.grnd_level;
+
+      let pressureResponse;
+      if (pressNivelMar && pressNivelSolo) {
+        pressureResponse = `Na cidade de ${currentWeather.name}, a pressão ao nível do mar é ${pressNivelMar} hPa e a pressão ao nível do solo é ${pressNivelSolo} hPa.`;
+
+        if (pressNivelMar < 1013) {
+          pressureResponse += " A pressão está abaixo do normal, o que pode indicar condições climáticas instáveis.";
+        } else if (pressNivelMar > 1013) {
+          pressureResponse += " A pressão está acima do normal, sugerindo um clima mais estável e seco.";
+        } else {
+          pressureResponse += " A pressão está normal, indicando condições climáticas típicas.";
+        }
+      } else {
+        pressureResponse = 'Não foi possível obter informações da pressão atmosférica para essa cidade no momento.';
+      }
+
       res.json({
-        fulfillmentText: pressNivelMar && pressNivelSolo
-          ? `Na cidade de ${currentWeather.name}. A Pressão ao nível do mar é ${pressNivelMar} hPa, Pressão ao nível do solo: ${pressNivelSolo} hPa`
-          : 'Não foi possível obter informação da pressão atmosférica para essa cidade no momento.',
+        fulfillmentText: pressureResponse,
       });
     }
   });

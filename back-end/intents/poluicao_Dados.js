@@ -62,8 +62,21 @@ module.exports = async (req, res) => {
       .map(([key, value]) => `${key}: ${value.toFixed(2)} µg/m³`)
       .join(', ');
 
+    // Respostas dinâmicas baseadas no AQI
+    let advice;
+    if (pollutionData.aqi === 1) {
+      advice = `O ar está limpo em ${cidade}. Você pode sair e aproveitar o dia!`;
+    } else if (pollutionData.aqi === 2) {
+      advice = `A qualidade do ar é boa hoje. Aproveite suas atividades ao ar livre!`;
+    } else if (pollutionData.aqi > 2 && pollutionData.aqi <= 4) {
+      advice = `Cuidado! O índice de qualidade do ar está alto em ${cidade}. Considere ficar em ambientes fechados.`;
+    } else {
+      advice = `A qualidade do ar é ruim. É melhor evitar atividades intensas ao ar livre.`;
+    }
+
     res.json({
-      fulfillmentText: `O índice de qualidade do ar (AQI) em ${cidade} é ${pollutionData.aqi} (${aqiDescription}). Os principais componentes da poluição do ar incluem: ${componentDetails}.`
+      fulfillmentText: `O índice de qualidade do ar (AQI) em ${cidade} é ${pollutionData.aqi} (${aqiDescription}). ${advice}`,
+      components: componentDetails,
     });
   } catch (error) {
     console.error('Erro:', error);
