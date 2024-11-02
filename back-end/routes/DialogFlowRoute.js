@@ -124,7 +124,7 @@ router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
 
 
 // Rota para adicionar mensagem a uma consulta que já existe
-router.post('/adicionar-mensagem/:id', async (req, res) => {
+router.post('/adicionar-mensagem/:id', verifyToken, async (req, res) => {
   const { question } = req.body;
   const { id } = req.params;
 
