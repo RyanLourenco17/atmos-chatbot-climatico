@@ -11,6 +11,7 @@ const ConsultationPage = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Função para buscar mensagens da consulta ao carregar a página
   const fetchMessages = async (consultationId) => {
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultas/${consultationId}`, {
@@ -37,9 +38,40 @@ const ConsultationPage = () => {
     }
   }, [consultationId]);
 
-  const handleNewQuestion = (newQuestion) => {
-    const newMessage = { question: newQuestion, answer: 'Buscando resposta...' };
+  const handleNewQuestion = async (question) => {
+    // Adiciona a pergunta na interface enquanto aguarda a resposta
+    const newMessage = { question, answer: 'Buscando resposta...' };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+    try {
+      const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/adicionar-mensagem/${consultationId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          userId: localStorage.getItem('userId'),
+          question,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // Atualiza a resposta da mensagem com o texto retornado pela API
+        setMessages((prevMessages) =>
+          prevMessages.map((msg, index) =>
+            index === prevMessages.length - 1
+              ? { ...msg, answer: data.fulfillmentText }
+              : msg
+          )
+        );
+      } else {
+        console.error('Erro ao adicionar mensagem:', data.error);
+      }
+    } catch (error) {
+      console.error('Erro ao processar a solicitação:', error);
+    }
   };
 
   return (
@@ -68,7 +100,7 @@ const ConsultationPage = () => {
             onNewQuestion={handleNewQuestion} 
             isMessageMode={true} 
             consultationId={consultationId} 
-            apiRoute={`adicionar-mensagem/${consultationId}`} // Use crase aqui
+            apiRoute={`adicionar-mensagem/${consultationId}`}
           />
         </div>
       </div>

@@ -44,7 +44,30 @@ const getAccessToken = async () => {
 // Obtendo o AccessToken ao carregar o módulo
 getAccessToken().catch(err => console.error('Erro ao obter o AccessToken:', err));
 
-// Rota para consultar Dialogflow
+
+// Endpoint para funcionar como webhook do Dialogflow
+router.post('/webhook', async (req, res) => {
+  const intentName = req.body.queryResult.intent.displayName;
+
+  switch (intentName) {
+    case "clima_Atual":
+      return clima_Atual(req, res);
+
+    case "pressao_Atm":
+      return pressao_Atm(req, res);
+
+    case "poluicao_Dados":
+      return poluicao_Dados(req, res);
+
+    case "dados_Total":
+      return dados_Total(req, res);
+
+    default:
+      res.json({ fulfillmentText: "Desculpe, não entendi sua solicitação." });
+      break;
+  }
+});
+
 // Rota para consultar Dialogflow
 router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
   const { question } = req.body;
@@ -100,26 +123,64 @@ router.post('/consultar-dialogflow', verifyToken, async (req, res) => {
 });
 
 
-// Endpoint para funcionar como webhook do Dialogflow
-router.post('/webhook', async (req, res) => {
-  const intentName = req.body.queryResult.intent.displayName;
+// Rota para adicionar mensagem a uma consulta que já existe
+router.post('/adicionar-mensagem/:id', async (req, res) => {
+  const { question } = req.body;
+  const { id } = req.params;
 
-  switch (intentName) {
-    case "clima_Atual":
-      return clima_Atual(req, res);
+  try {
+    // Verificando se a consulta existe
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ error: 'Consulta não encontrada.' });
+    }
 
-    case "pressao_Atm":
-      return pressao_Atm(req, res);
+    await getAccessToken();
 
-    case "poluicao_Dados":
-      return poluicao_Dados(req, res);
+    const sessionId = `${consultation.user}_${Date.now()}`;
+    const languageCode = 'pt-BR';
 
-    case "dados_Total":
-      return dados_Total(req, res);
+    // Requisição para o Dialogflow
+    const response = await axios.post(
+      `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+      {
+        queryInput: {
+          text: {
+            text: question,
+            languageCode: languageCode,
+          },
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
-    default:
-      res.json({ fulfillmentText: "Desculpe, não entendi sua solicitação." });
-      break;
+    // Extraindo dados da resposta do Dialogflow
+    const dialogflowAnswer = response.data.queryResult.fulfillmentText;
+    const parameters = response.data.queryResult.parameters || {};
+    const intentName = response.data.queryResult.intent.displayName || '';
+
+    // Criando e salvando a nova mensagem no banco de dados
+    const message = new Message({
+      question,
+      answer: dialogflowAnswer,
+      parameters,
+      intentName,
+    });
+    await message.save();
+
+    // Adicionando a nova mensagem à consulta existente
+    consultation.messages.push(message._id);
+    await consultation.save();
+
+    // Respondendo ao front-end
+    res.json({ fulfillmentText: dialogflowAnswer });
+  } catch (error) {
+    console.error('Erro ao adicionar mensagem:', error);
+    res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
   }
 });
 
@@ -178,6 +239,3 @@ router.delete('/consultas/:id', verifyToken, async (req, res) => {
 
 module.exports = router;
 
-
-
-module.exports = router;

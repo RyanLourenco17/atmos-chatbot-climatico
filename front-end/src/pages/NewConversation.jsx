@@ -8,24 +8,14 @@ import './NewConversation.css';
 const NewConversation = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    try {
-      const response = await fetch('https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/consultar-dialogflow', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ userId: localStorage.getItem('userId') }),
-      });
-  
-      const data = await response.json();
-      navigate(`/consulta/${data.consultationId}`);
-    } catch (error) {
-      console.error('Erro ao criar nova consulta:', error);
+  // Recebe consultationId e navega para a página correta
+  const handleSubmit = (consultationId) => {
+    if (consultationId) {
+      navigate(`/consulta/${consultationId}`);
+    } else {
+      console.error("Consulta ID não foi retornado");
     }
   };
-  
 
   return (
     <div className="page-container">
@@ -35,8 +25,8 @@ const NewConversation = () => {
           <Loading />
           <CardSugestion />
           <TextareaQuestion
-            onNewQuestion={handleSubmit}
-            isMessageMode={false} 
+            onNewQuestion={handleSubmit} // Passa a função handleSubmit
+            isMessageMode={false}
             apiRoute="consultar-dialogflow"
           />
         </div>

@@ -11,8 +11,6 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    onNewQuestion(question); // Adiciona a nova pergunta à interface
 
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/${apiRoute}`, {
@@ -30,8 +28,9 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
 
       const data = await response.json();
 
-      if (response.ok) {
-        console.log('Resposta do Dialogflow:', data.fulfillmentText);
+      if (response.ok && data.consultationId) {
+        console.log('Id da consulta:', data.consultationId);
+        onNewQuestion(data.consultationId); // Passa consultationId para a navegação
       } else {
         console.error('Erro ao consultar o Dialogflow:', data.error);
       }
