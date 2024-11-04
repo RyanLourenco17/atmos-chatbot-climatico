@@ -16,7 +16,7 @@ const NewConversation = () => {
       console.error("Consulta ID não foi retornado");
     }
   };
-
+  
   return (
     <div className="page-container">
       <MenuSide />

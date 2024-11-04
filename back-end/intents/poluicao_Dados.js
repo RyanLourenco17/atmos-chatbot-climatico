@@ -1,7 +1,6 @@
 const helper = require('../middlewares/helper');
 const axios = require('axios');
 
-// Funções auxiliares para dados de geolocalização e poluição
 async function getCoordinates(cidade) {
   const url = `http://api.openweathermap.org/geo/1.0/direct?q=${cidade}&limit=1&appid=${process.env.OPENWEATHER_API_KEY}`;
   try {
@@ -28,14 +27,12 @@ async function getAirPollution(lat, lon) {
   }
 }
 
-// Mapeamento do AQI para uma descrição mais amigável
 const aqiDescriptions = {
-  1: "Bom (0-50): A qualidade do ar é considerada satisfatória, e a poluição do ar representa pouco ou nenhum risco.",
-  2: "Moderado (51-100): A qualidade do ar é aceitável; no entanto, para alguns poluentes, pode haver uma preocupação leve para algumas pessoas.",
-  3: "Insatisfatório (101-150): A qualidade do ar é insatisfatória, e pode haver efeitos adversos para a saúde em algumas pessoas, especialmente aquelas mais sensíveis à poluição do ar.",
-  4: "Ruim (151-200): A qualidade do ar é ruim, e todos podem começar a sentir os efeitos da poluição. A saúde dos grupos sensíveis pode ser afetada.",
-  5: "Muito Ruim (201-300): A qualidade do ar é muito ruim, e pode haver efeitos mais sérios na saúde para todos.",
-  6: "Perigoso (301-500): A qualidade do ar é considerada perigosa, e toda a população pode ser afetada.",
+  1: "Bom: A qualidade do ar é considerada satisfatória, e a poluição do ar representa pouco ou nenhum risco.",
+  2: "Moderado: A qualidade do ar é aceitável; pode haver uma preocupação leve para pessoas sensíveis.",
+  3: "Insatisfatório: A qualidade do ar pode causar efeitos adversos em pessoas sensíveis.",
+  4: "Ruim: A qualidade do ar é ruim para todos, especialmente para grupos sensíveis.",
+  5: "Muito Ruim: A qualidade do ar é muito ruim, afetando a saúde de todos.",
 };
 
 module.exports = async (req, res) => {
@@ -56,27 +53,39 @@ module.exports = async (req, res) => {
     // Obtendo a descrição do AQI
     const aqiDescription = aqiDescriptions[pollutionData.aqi] || 'Dados de qualidade do ar não disponíveis.';
 
-    // Montando a resposta
-    const components = pollutionData.components;
+    // Montando a resposta detalhada para cada poluente
+    const { components } = pollutionData;
+    const poluenteInfo = {
+      co: "Monóxido de Carbono (CO)",
+      no: "Monóxido de Nitrogênio (NO)",
+      no2: "Dióxido de Nitrogênio (NO₂)",
+      o3: "Ozônio (O₃)",
+      so2: "Dióxido de Enxofre (SO₂)",
+      nh3: "Amônia (NH₃)",
+      pm2_5: "Material Particulado Fino (PM2.5)",
+      pm10: "Material Particulado Grosso (PM10)"
+    };
+
     const componentDetails = Object.entries(components)
-      .map(([key, value]) => `${key}: ${value.toFixed(2)} µg/m³`)
+      .map(([key, value]) => `${poluenteInfo[key] || key}: ${value.toFixed(2)} µg/m³`)
       .join(', ');
 
     // Respostas dinâmicas baseadas no AQI
     let advice;
     if (pollutionData.aqi === 1) {
-      advice = `O ar está limpo em ${cidade}. Você pode sair e aproveitar o dia!`;
+      advice = `O ar está limpo em ${cidade}. Pode sair e aproveitar o dia!`;
     } else if (pollutionData.aqi === 2) {
       advice = `A qualidade do ar é boa hoje. Aproveite suas atividades ao ar livre!`;
-    } else if (pollutionData.aqi > 2 && pollutionData.aqi <= 4) {
-      advice = `Cuidado! O índice de qualidade do ar está alto em ${cidade}. Considere ficar em ambientes fechados.`;
+    } else if (pollutionData.aqi === 3) {
+      advice = `O índice de qualidade do ar está moderado em ${cidade}. Considere limitar o tempo ao ar livre se você for sensível a poluentes.`;
+    } else if (pollutionData.aqi === 4) {
+      advice = `O ar está ruim em ${cidade}. É aconselhável ficar em ambientes fechados se possível.`;
     } else {
-      advice = `A qualidade do ar é ruim. É melhor evitar atividades intensas ao ar livre.`;
+      advice = `A qualidade do ar é muito ruim. Evite atividades intensas ao ar livre.`;
     }
 
     res.json({
-      fulfillmentText: `O índice de qualidade do ar (AQI) em ${cidade} é ${pollutionData.aqi} (${aqiDescription}). ${advice}`,
-      components: componentDetails,
+      fulfillmentText: `O índice de qualidade do ar (AQI) em ${cidade} é ${pollutionData.aqi} (${aqiDescription}). Componentes detectados: ${componentDetails}. ${advice}`
     });
   } catch (error) {
     console.error('Erro:', error);
