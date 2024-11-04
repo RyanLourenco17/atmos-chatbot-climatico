@@ -1,45 +1,42 @@
-const OpenWeatherMapHelper = require("openweathermap-node");
-const Message = require("../models/Message");
-const helper = new OpenWeatherMapHelper({
-    APPID: process.env.OPENWEATHER_API_KEY,
-    units: "metric",
-    lang: "pt_br"
-});
+const helper = require('../middlewares/helper');
 
-async function handleTempMaxIntent(cidade, consultation, res, queryText) {
+function getRandomResponse(respostas) {
+    return respostas[Math.floor(Math.random() * respostas.length)];
+}
+
+module.exports = async (req, res) => {
+    const cidade = req.body.queryResult.parameters["cidade"];
     if (!cidade) {
-        return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade para obter a previsão de temperatura máxima." });
+        return res.json({ "fulfillmentText": "Por favor, forneça o nome do lugar para obter a previsão de temperatura máxima." });
     }
+
     try {
         const currentWeather = await new Promise((resolve, reject) => {
             helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
                 if (err) {
                     console.error("Erro ao buscar clima: ", err);
-                    return res.json({ "fulfillmentText": "Desculpe, não consegui encontrar a cidade ou obter os dados climáticos." });
+                    return reject(err);
                 }
                 resolve(currentWeather);
             });
         });
 
         if (!currentWeather || currentWeather.cod !== 200) {
-            return res.json({ "fulfillmentText": "Não foi possível encontrar a cidade ou obter as informações climáticas." });
+            return res.json({ "fulfillmentText": "Não foi possível encontrar o lugar ou obter as informações climáticas." });
         }
 
         const tempMax = Math.round(currentWeather.main.temp_max);
-        const resposta = `A temperatura máxima prevista para ${currentWeather.name} é de ${tempMax}°C.`;
+        const respostas = [
+            `A previsão de temperatura máxima para ${currentWeather.name} é de aproximadamente ${tempMax}°C.`,
+            `Hoje, a temperatura máxima esperada em ${currentWeather.name} é de ${tempMax}°C.`,
+            `Em ${currentWeather.name}, a temperatura pode alcançar até ${tempMax}°C hoje.`
+        ];
 
-        const newMessage = new Message({ question: queryText, answer: resposta });
-        await newMessage.save();
-
-        consultation.messages.push(newMessage._id);
-        await consultation.save();
-
-        res.json({ "fulfillmentText": resposta, consultationId: consultation._id });
-
+        res.json({
+            fulfillmentText: getRandomResponse(respostas),
+        });
     } catch (error) {
         console.error("Erro ao buscar temperatura máxima: ", error);
         return res.json({ "fulfillmentText": "Desculpe, não conseguimos obter os dados de temperatura máxima." });
     }
-}
-
-module.exports = handleTempMaxIntent;
+};

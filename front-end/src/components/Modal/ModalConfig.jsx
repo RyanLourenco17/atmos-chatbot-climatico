@@ -72,22 +72,24 @@ const ModalConfig = ({ show, handleClose }) => {
 
   const handleSave = async () => {
     try {
+      const bodyData = {
+        name: username,
+        email: email,
+        theme: theme,
+        ...(password && { password }), // Apenas adiciona `password` se ele não estiver vazio
+      };
+  
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/user/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: username,
-          email: email,
-          theme: theme,
-          password: password,
-        }),
+        body: JSON.stringify(bodyData),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         alert('Dados atualizados com sucesso!');
         if (theme === 'light') {
@@ -104,6 +106,7 @@ const ModalConfig = ({ show, handleClose }) => {
       alert("Erro ao atualizar os dados.");
     }
   };
+  
 
   const handleDeleteAccount = async () => {
     try {

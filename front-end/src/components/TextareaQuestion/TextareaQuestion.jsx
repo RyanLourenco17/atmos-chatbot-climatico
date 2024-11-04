@@ -11,7 +11,7 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch(`https://atmos-chatbot-climatico-backend.onrender.com/api/dialogflow/${apiRoute}`, {
         method: 'POST',
@@ -25,12 +25,11 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
           ...(isMessageMode ? { consultationId } : {}),
         }),
       });
-
+  
       const data = await response.json();
-
-      if (response.ok && data.consultationId) {
-        console.log('Id da consulta:', data.consultationId);
-        onNewQuestion(data.consultationId);
+  
+      if (response.ok && data.fulfillmentText) {
+        onNewQuestion(question);
       } else {
         console.error('Erro ao consultar o Dialogflow:', data.error);
       }
@@ -40,6 +39,7 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
       setQuestion(''); 
     }
   };
+  
 
   return (
     <form className="componentTextarea" onSubmit={handleSubmit}>

@@ -10,7 +10,7 @@ const ConsultationPage = () => {
   const { consultationId } = useParams();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isQuestionLoading, setIsQuestionLoading] = useState(false); // Novo estado para a pergunta
+  const [isQuestionLoading, setIsQuestionLoading] = useState(false); // Estado para o loading da pergunta
 
   // Função para buscar mensagens da consulta ao carregar a página
   const fetchMessages = async (consultationId) => {
@@ -40,9 +40,8 @@ const ConsultationPage = () => {
   }, [consultationId]);
 
   const handleNewQuestion = async (question) => {
-    // Adiciona a pergunta na interface enquanto aguarda a resposta
-    const newMessage = { question, answer: 'Buscando resposta...' };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    // Adiciona a pergunta na interface e ativa o loading enquanto aguarda a resposta
+    setMessages((prevMessages) => [...prevMessages, { question, answer: null }]);
     setIsQuestionLoading(true);
   
     try {
@@ -60,7 +59,7 @@ const ConsultationPage = () => {
   
       const data = await response.json();
       if (response.ok) {
-        
+        // Atualiza a última mensagem com a resposta recebida
         setMessages((prevMessages) => [
           ...prevMessages.slice(0, prevMessages.length - 1),
           { question, answer: data.fulfillmentText }
@@ -90,12 +89,15 @@ const ConsultationPage = () => {
                   <p className="question-text">{message.question}</p>
                   <div className="answer-wrapper">
                     <img src={mascoteImg} alt="Mascote" />
-                    <p className="answer-text">{message.answer}</p>
+                    {message.answer ? (
+                      <p className="answer-text">{message.answer}</p>
+                    ) : (
+                      <Loading /> // Exibe o componente de loading enquanto a resposta não chega
+                    )}
                   </div>
                 </div>
               ))
             )}
-            {isQuestionLoading && <Loading />} {/* Exibe loading enquanto espera a resposta */}
           </div>
         </div>
         <div className="interactive-area">

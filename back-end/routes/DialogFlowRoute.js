@@ -16,6 +16,12 @@ const clima_Atual = require('../intents/clima_Atual')
 const dados_Total = require('../intents/dados_Total')
 const poluicao_Dados = require('../intents/poluicao_Dados')
 const pressao_Atm = require('../intents/pressao_Atm')
+const temp_Chuva = require("../intents/temp_Chuva")
+const temp_Max = require("../intents/temp_Max")
+const temp_Min = require("../intents/temp_Min")
+const temp_NeblVisb = require("../intents/temp_NeblVisb")
+const temp_Umidade = require("../intents/temp_Umidade")
+const temp_Vento = require("../intents/temp_Vento")
 
 // Modelos de Dados
 const Message = require('../models/Message');
@@ -50,22 +56,41 @@ router.post('/webhook', async (req, res) => {
   const intentName = req.body.queryResult.intent.displayName;
 
   switch (intentName) {
-    case "clima_Atual":
-      return clima_Atual(req, res);
+  case "clima_Atual":
+    return clima_Atual(req, res);
 
-    case "pressao_Atm":
-      return pressao_Atm(req, res);
+  case "pressao_Atm":
+    return pressao_Atm(req, res);
 
-    case "poluicao_Dados":
-      return poluicao_Dados(req, res);
+  case "poluicao_Dados":
+    return poluicao_Dados(req, res);
 
-    case "dados_Total":
-      return dados_Total(req, res);
+  case "dados_Total":
+    return dados_Total(req, res);
 
-    default:
-      res.json({ fulfillmentText: "Desculpe, não entendi sua solicitação." });
-      break;
+  case "temp_Chuva":
+    return temp_Chuva(req, res);
+
+  case "temp_Max":
+    return temp_Max(req, res);
+
+  case "temp_Min":
+    return temp_Min(req, res);
+
+  case "temp_NeblVisb":
+    return temp_NeblVisb(req, res);
+
+  case "temp_Umidade":
+    return temp_Umidade(req, res);
+
+  case "temp_Vento":
+    return temp_Vento(req, res);
+
+  default:
+    res.json({ fulfillmentText: "Desculpe, não entendi sua solicitação." });
+    break;
   }
+
 });
 
 // Rota para consultar Dialogflow
