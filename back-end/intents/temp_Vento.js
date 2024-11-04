@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
 
 async function handleVentoIntent(cidade, res, queryText) {
   if (!cidade) {
-    return res.json({ "fulfillmentText": "Por favor, forneça o nome da cidade." });
+    return res.json({ "fulfillmentText": "Por favor, forneça o nome do lugar ." });
   }
   try {
     const currentWeather = await new Promise((resolve, reject) => {
