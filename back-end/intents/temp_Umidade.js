@@ -29,9 +29,9 @@ async function handleUmidadeIntent(cidade, res, queryText) {
     const umidadeTempo = currentWeather.main.humidity;
 
     const respostasUmidade = [
-        `A umidade atual em ${currentWeather.name} está em ${umidadeTempo}%.`,
-        `Em ${currentWeather.name}, a umidade é de ${umidadeTempo}%.`,
-        `Atualmente, ${currentWeather.name} apresenta uma umidade de ${umidadeTempo}%.`
+      `A umidade atual em ${currentWeather.name} está em ${umidadeTempo}%.`,
+      `Em ${currentWeather.name}, a umidade é de ${umidadeTempo}%.`,
+      `Atualmente, ${currentWeather.name} apresenta uma umidade de ${umidadeTempo}%.`
     ];
 
     const resposta = umidadeTempo
@@ -40,7 +40,7 @@ async function handleUmidadeIntent(cidade, res, queryText) {
 
 
   } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      res.json({ "fulfillmentText": "Erro ao obter os dados climáticos." });
+    console.error("Erro ao buscar dados:", error);
+    res.json({ "fulfillmentText": "Erro ao obter os dados climáticos." });
     }
 }
