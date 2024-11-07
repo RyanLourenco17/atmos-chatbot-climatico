@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MicFill, Send } from 'react-bootstrap-icons';
+import { Send } from 'react-bootstrap-icons';
 
 import './Textarea.css';
 
@@ -57,7 +57,6 @@ const TextareaQuestion = ({ onNewQuestion, isMessageMode, consultationId, apiRou
           value={question} 
           onChange={handleInputChange} 
         />
-        <MicFill className="icon" />
       </div>
       <button className="btn-send" type="submit" disabled={!question.trim() || isLoading}>
         <Send className="icon" />
