@@ -3,10 +3,6 @@ const helper = require('../middlewares/helper');
 module.exports = async (req, res) => {
   const cidade = req.body.queryResult.parameters["cidade"];
 
-  if (!cidade) {
-    return res.json({ "fulfillmentText": "Por favor, forneça o nome do lugar." });
-  }
-
     helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
       if (err) {
         console.log(err);
@@ -15,7 +11,7 @@ module.exports = async (req, res) => {
       } else {
         const visibilidade = currentWeather.visibility;
         const nebulosidade = currentWeather.clouds.all;
-        
+
         const respostasVisibilidade = [
           `A região de ${currentWeather.name} está com visibilidade de ${visibilidade} metros e a nebulosidade é de ${nebulosidade}%.`,
           `Em ${currentWeather.name}, a visibilidade é de ${visibilidade} metros, com uma taxa de nebulosidade de ${nebulosidade}%.`,

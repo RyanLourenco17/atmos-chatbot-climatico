@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
         `Em ${currentWeather.name}, a umidade é de ${umidadeTempo}%.`,
         `Atualmente, ${currentWeather.name} apresenta uma umidade de ${umidadeTempo}%.`
       ];
-      
+
       const resposta = umidadeTempo
       ? respostasUmidade[Math.floor(Math.random() * respostasUmidade.length)]
       : "Não temos dados sobre a umidade deste lugar.";
