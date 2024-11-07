@@ -7,33 +7,20 @@ module.exports = async (req, res) => {
     return res.json({ "fulfillmentText": "Por favor, forneça o nome do lugar." });
   }
 
-  try {
-    const currentWeather = await new Promise((resolve, reject) => {
-      helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
-        if (err) {
-          console.error("Erro ao buscar clima:", err);
-          return res.json({ "fulfillmentText": "Erro ao obter os dados climáticos." });
-        }
-        resolve(currentWeather);
+  helper.getCurrentWeatherByCityName(cidade, (err, currentWeather) => {
+    if (err) {
+      console.log(`Erro ao obter dados meteorológicos: ${err}`);
+      res.json({
+        fulfillmentText: `Erro ao obter dados sobre o vento em ${currentWeather.name}`,
       });
-    });
-
-    if (!currentWeather || currentWeather.cod !== 200) {
-      return res.json({ "fulfillmentText": "Lugar ou informações não disponíveis." });
+    }else {
+      const { speed, deg, gust } = currentWeather.wind;
+      const respostasVento = [
+        `Em ${currentWeather.name}, a velocidade do vento é de ${parseInt(speed)} m/s, vindo de ${deg} graus.`,
+        `Atualmente, a velocidade do vento em ${currentWeather.name} é de ${parseInt(speed)} m/s, com rajadas de ${gust} m/s.`
+  ];
+      const resposta = respostasVento[Math.floor(Math.random() * respostasVento.length)];
+      res.json({fulfillmentText: resposta });
     }
-
-    const { speed, deg, gust } = currentWeather.wind;
-
-    const respostasVento = [
-      `Em ${currentWeather.name}, a velocidade do vento é de ${parseInt(speed)} m/s, vindo de ${deg} graus.`,
-      `Atualmente, a velocidade do vento em ${currentWeather.name} é de ${parseInt(speed)} m/s, com rajadas de ${gust} m/s.`
-    ];
-
-    const resposta = respostasVento[Math.floor(Math.random() * respostasVento.length)];
-    res.json({ "fulfillmentText": resposta });
-
-  } catch (error) {
-    console.error("Erro ao buscar dados:", error);
-    res.json({ "fulfillmentText": "Erro ao obter os dados climáticos." });
-  }
+  });
 };
