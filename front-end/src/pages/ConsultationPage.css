@@ -2,7 +2,7 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    align-items: center;
     margin: 5rem 10rem;
   }
   
@@ -12,9 +12,9 @@
     padding: 1rem;
     border-radius: 1rem;
     /* box-shadow: 0 0 15px var(--black-color); */
-    max-height: 500px; /* Defina a altura máxima */
+    max-height: 500px;
     max-width: 750px;
-    overflow-y: auto; /* Habilita o scroll */
+    overflow-y: auto; 
   }
   
   .scrollable-section::-webkit-scrollbar {
@@ -67,7 +67,7 @@
     }
   
     .consultation-display {
-      max-height: 300px; /* Ajuste a altura para dispositivos menores */
+      max-height: 90%;
       margin-top: 6rem;
     }
   
