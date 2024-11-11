@@ -11,10 +11,10 @@ const CardSugestion = () => {
                 <p className="card-title">Qual é a velocidade do vento em Santos?</p>
             </div>
             <div className="card-body">
-                <p className="card-title">Qual a pressão atmosférica em Recife ?</p>
+                <p className="card-title">Como está a umidade do ar em Santa Catarina ?</p>
             </div>
             <div className="card-body">
-                <p className="card-title">Como está o clima atual em Campinas?</p>
+                <p className="card-title">Como está o clima em Campinas ?</p>
             </div>
         </div>
     </>
